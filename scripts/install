@@ -57,7 +57,6 @@ sed -i "s@DBUSERTOCHANGE@$db_user@g" ../conf/database.yml
 sed -i "s@DBPASSTOCHANGE@$db_user@g" ../conf/database.yml
 sudo cp ../conf/diaspora.yml $final_path/config/
 sudo cp ../conf/database.yml $final_path/config/
-sudo chown -R diaspora:diaspora $final_path
 
 # install startup script
 sudo cp ../conf/diaspora_ynh /etc/init.d/diaspora_ynh
@@ -68,29 +67,19 @@ sudo update-rc.d diaspora_ynh defaults
 #sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --quiet --disabled-login -d $final_path diaspora
 sudo useradd -d $final_path diaspora
 sudo chown -R diaspora:diaspora $final_path
-sudo su diaspora
-cd ~
-echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"' >> ~/.bashrc
+
+sudo su - diaspora -c "echo '[[ -s \"$HOME/.rvm/scripts/rvm\" ]] && source \"$HOME/.rvm/scripts/rvm\"' >> ~/.bashrc"
 
 # Config RVM
-curl -sSL https://rvm.io/mpapis.asc | gpg --import -
-curl -L dspr.tk/1t | bash
-. ~/.bashrc
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-rvm install 2.0
-
-cd $final_path
+sudo su - diaspora -c "curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t | bash ; rvm install 2.0"
 
 # force get app deps (for debug)
-gem install nokogiri -v '1.6.1'
-gem install raindrops -v '0.13.0'
+sudo su - diaspora -c "cd $final_path; gem install nokogiri -v '1.6.1'; gem install raindrops -v '0.13.0'"
 
 # construct diaspora app
-RAILS_ENV=production bundle install --without test development
-RAILS_ENV=production bundle exec rake db:create db:schema:load
-RAILS_ENV=production bundle exec rake assets:precompile
-
-exit
+sudo su - diaspora -c "cd $final_path; RAILS_ENV=production bundle install --without test development"
+sudo su - diaspora -c "cd $final_path; RAILS_ENV=production bundle exec rake db:create db:schema:load"
+sudo su - diaspora -c "cd $final_path; RAILS_ENV=production bundle exec rake assets:precompile"
 
 cd $ori_path
 
