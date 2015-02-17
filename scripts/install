@@ -38,7 +38,7 @@ sudo apt-get install -t wheezy-backports redis-server -y
 
 # get source code
 git clone -b master git://github.com/diaspora/diaspora.git
-mv diaspora $final_path
+sudo mv diaspora $final_path
 
 # Generate random password
 
