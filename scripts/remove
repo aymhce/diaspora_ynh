@@ -1,0 +1,22 @@
+#!/bin/bash
+
+db_user=diaspora
+db_name=diaspora
+root_pwd=$(sudo cat /etc/yunohost/mysql)
+domain=$(sudo yunohost app setting diaspora domain)
+
+sudo service diaspora stop
+
+mysql -u root -p$root_pwd -e "DROP DATABASE $db_name ; DROP USER $db_user@localhost ;"
+
+sudo rm -rf /var/www/diaspora
+sudo rm -f /etc/nginx/conf.d/$domain.d/diaspora.conf
+
+sudo service nginx reload
+
+sudo deluser --remove-home diaspora
+
+sudo update-rc.d -f diaspora remove
+sudo rm -f /etc/init.d/diaspora
+sudo rm -f /etc/diaspora.conf
+

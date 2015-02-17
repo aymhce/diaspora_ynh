@@ -1,0 +1,49 @@
+{
+    "name": "Diaspora",
+    "id": "diaspora",
+    "description": {
+        "en": "Distributed social networking service",
+        "fr": "Service de réseau social distribué"
+    },
+    "developer": {
+        "name": "aymhce",
+        "email": "aymhce@gmail.com",
+        "url": "http://diasporafoundation.org"
+    },
+    "multi_instance": "true",
+    "arguments": {
+        "install" : [
+            {
+                "name": "domain",
+                "ask": {
+                    "en": "Choose a domain for Diaspora"
+                },
+                "example": "domain.org"
+            },
+            {
+                "name": "path",
+                "ask": {
+                    "en": "Choose a path for Diaspora"
+                },
+                "example": "/diaspora",
+                "default": "/diaspora"
+            },
+            {
+                "name": "admin",
+                "ask": {
+                    "en": "Choose the Diaspora administrator (must be an existing YunoHost user)"
+                },
+                "example": "homer"
+            },
+            {
+                "name": "public_site",
+                "ask": {
+                    "en": "Is it a public Diaspora site ?",
+                    "fr": "Est-ce un site public ?"
+                },
+                "choices": ["Yes", "No"],
+                "default": "Yes"
+            }
+        ]
+    }
+}
