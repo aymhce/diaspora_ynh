@@ -1,6 +1,6 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides: diaspora_ynh
+# Provides: diaspora
 # Required-Start: $remote_fs $syslog mysql redis-server
 # Required-Stop: $remote_fs $syslog mysql redis-server
 # Default-Start: 2 3 4 5
@@ -11,7 +11,6 @@
 
 # Author: FABIAN Tamas Laszlo <giganetom@gmail.com>
 # Updated: Pirate Praveen <praveen@debian.org>
-# Updated: aymhce <aymhce@gmail.com>
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 # Note: /usr/local/bin for foreman gem
