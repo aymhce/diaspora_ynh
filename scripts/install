@@ -65,7 +65,8 @@ sudo chmod 754 /etc/init.d/diaspora_ynh
 sudo update-rc.d diaspora_ynh defaults
 
 # create and config user
-sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --quiet --disabled-login --home $final_path diaspora
+#sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --quiet --disabled-login -d $final_path diaspora
+sudo useradd -d $final_path diaspora
 sudo chown -R diaspora:diaspora $final_path
 sudo su diaspora
 cd ~
