@@ -39,7 +39,6 @@ sudo apt-get install -t wheezy-backports redis-server -y
 # get source code
 git clone -b master git://github.com/diaspora/diaspora.git
 mv diaspora $final_path
-sudo chown -R diaspora:diaspora $final_path
 
 # Generate random password
 
@@ -67,7 +66,7 @@ sudo update-rc.d diaspora_ynh defaults
 
 # create and config user
 sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --quiet --disabled-login --home $final_path diaspora
-
+sudo chown -R diaspora:diaspora $final_path
 sudo su diaspora
 cd ~
 echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"' >> ~/.bashrc
