@@ -71,7 +71,8 @@ sudo chown -R diaspora:diaspora $final_path
 sudo su - diaspora -c "echo '. ~/.rvm/scripts/rvm' >> ~/.bashrc"
 
 # Config RVM and force get app deps (for debug)
-sudo su - diaspora -c "PATH=$PATH:$final_path; curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t | bash; rvm autolibs read-fail ; rvm install 2.0 ;"
+sudo su - diaspora -c "PATH=$PATH:$final_path; curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t | bash;"
+sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; rvm autolibs read-fail ; rvm install 2.0 ;"
 sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; gem install nokogiri -v '1.6.1'; gem install raindrops -v '0.13.0'"
 
 # construct diaspora app
