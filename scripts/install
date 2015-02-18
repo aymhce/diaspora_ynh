@@ -71,14 +71,13 @@ sudo chown -R diaspora:diaspora $final_path
 sudo su - diaspora -c "echo '. ~/.rvm/scripts/rvm' >> ~/.bashrc"
 
 # Config RVM and force get app deps (for debug)
-sudo su - diaspora -c "PATH=$PATH:$final_path; curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t;"
-sudo su - diaspora -c "PATH=$PATH:$final_path; rvm autolibs read-fail ; rvm install 2.0 ;"
-sudo su - diaspora -c "PATH=$PATH:$final_path; gem install nokogiri -v '1.6.1'; gem install raindrops -v '0.13.0'"
+sudo su - diaspora -c "PATH=$PATH:$final_path; curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t; rvm autolibs read-fail ; rvm install 2.0 ;"
+sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; gem install nokogiri -v '1.6.1'; gem install raindrops -v '0.13.0'"
 
 # construct diaspora app
-sudo su - diaspora -c "PATH=$PATH:$final_path; RAILS_ENV=production bundle install --without test development"
-sudo su - diaspora -c "PATH=$PATH:$final_path; RAILS_ENV=production bundle exec rake db:create db:schema:load"
-sudo su - diaspora -c "PATH=$PATH:$final_path; RAILS_ENV=production bundle exec rake assets:precompile"
+sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; RAILS_ENV=production bundle install --without test development"
+sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; RAILS_ENV=production bundle exec rake db:create db:schema:load"
+sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; RAILS_ENV=production bundle exec rake assets:precompile"
 
 cd $ori_path
 
