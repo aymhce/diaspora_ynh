@@ -70,12 +70,9 @@ sudo chown -R diaspora:diaspora $final_path
 
 sudo su - diaspora -c "echo '[[ -s \"$HOME/.rvm/scripts/rvm\" ]] && source \"$HOME/.rvm/scripts/rvm\"' >> ~/.bashrc"
 
-# Config RVM
+# Config RVM and force get app deps (for debug)
 sudo su - diaspora -c "cd $final_path; curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t"
-sudo su - diaspora -c "cd $final_path; rvm autolibs read-fail ; rvm install 2.0"
-
-# force get app deps (for debug)
-sudo su - diaspora -c "cd $final_path; gem install nokogiri -v '1.6.1'; gem install raindrops -v '0.13.0'"
+sudo su - diaspora -c "cd $final_path; rvm autolibs read-fail ; rvm install 2.0 ; gem install nokogiri -v '1.6.1'; gem install raindrops -v '0.13.0'"
 
 # construct diaspora app
 sudo su - diaspora -c "cd $final_path; RAILS_ENV=production bundle install --without test development"
