@@ -1,7 +1,7 @@
 #!/bin/bash
 
 db_user=diaspora
-db_name=diaspora
+db_name=diaspora_production
 root_pwd=$(sudo cat /etc/yunohost/mysql)
 domain=$(sudo yunohost app setting diaspora domain)
 
