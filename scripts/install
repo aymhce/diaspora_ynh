@@ -2,9 +2,8 @@
 
 # Retrieve arguments
 domain=$1
-path=$2
-user=$3
-is_public=$4
+user=$2
+is_public=$3
 
 # Check user parameter
 sudo yunohost user list --json | grep -q "\"username\": \"$user\""
@@ -15,14 +14,16 @@ fi
 sudo yunohost app setting diaspora admin_user -v $user
 
 # Check domain/path availability
-sudo yunohost app checkurl $domain$path -a diaspora
+sudo yunohost app checkurl $domain -a diaspora
 if [[ ! $? -eq 0 ]]; then
     exit 1
 fi
 
 ori_path=$(pwd)
 final_path=/var/www/diaspora
-full_url=https://$domain$path
+full_url=https://$domain
+
+sudo yunohost app setting diaspora final_path -v $final_path
 
 # configure sys apt-get
 
@@ -38,7 +39,11 @@ sudo apt-get install -t wheezy-backports redis-server -y
 
 # get source code
 git clone -b master git://github.com/diaspora/diaspora.git
-sudo mv diaspora $final_path
+
+sudo mkdir -p $final_path
+tar -cf source.tar.gz diaspora/
+mv source.tar.gz diaspora/public/source.tar.gz
+sudo cp -ar diaspora/* $final_path
 
 # Generate random password
 
@@ -54,7 +59,7 @@ sudo yunohost app setting diaspora mysqlpwd -v $db_pwd
 # prepare and copy diaspora config file
 sed -i "s@FULLURLTOCHANGE@$full_url@g" ../conf/diaspora.yml
 sed -i "s@DBUSERTOCHANGE@$db_user@g" ../conf/database.yml
-sed -i "s@DBPASSTOCHANGE@$db_user@g" ../conf/database.yml
+sed -i "s@DBPASSTOCHANGE@$db_pwd@g" ../conf/database.yml
 sudo cp ../conf/diaspora.yml $final_path/config/
 sudo cp ../conf/database.yml $final_path/config/
 
@@ -64,30 +69,37 @@ sudo chmod 754 /etc/init.d/diaspora_ynh
 sudo update-rc.d diaspora_ynh defaults
 
 # create and config user
-#sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --quiet --disabled-login -d $final_path diaspora
-sudo useradd -d $final_path diaspora
+sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-login --quiet --home $final_path diaspora
 sudo chown -R diaspora:diaspora $final_path
 
-sudo su - diaspora -c "echo '. ~/.rvm/scripts/rvm' >> ~/.bashrc"
-
 # Config RVM and force get app deps (for debug)
-sudo su - diaspora -c "PATH=$PATH:$final_path; curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t | bash;"
-sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; rvm autolibs read-fail ; rvm install 2.0 ;"
-sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; gem install nokogiri -v '1.6.1'; gem install raindrops -v '0.13.0'"
+sudo su - diaspora -c "curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t | bash;"
+#sudo su - diaspora -c "rvm autolibs read-fail ; rvm install 2.0 ; rvm use 2.0.0 --default"
+
+sudo su - diaspora -c "rvm install 2.0"
+
+sudo env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install
 
 # construct diaspora app
-sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; RAILS_ENV=production bundle install --without test development"
-sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; RAILS_ENV=production bundle exec rake db:create db:schema:load"
-sudo su - diaspora -c "PATH=$PATH:$final_path; . ~/.bashrc; RAILS_ENV=production bundle exec rake assets:precompile"
+sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development"
+sudo su - diaspora -c "RAILS_ENV=production bundle exec rake db:create db:schema:load"
+sudo su - diaspora -c "RAILS_ENV=production bundle exec rake assets:precompile"
 
 cd $ori_path
 
-# start service
+# debug foreman module and start service
+sudo mv $final_path/.profile $final_path/.profile.bak
 sudo service diaspora_ynh start
 
 # config nginx
+cat /etc/nginx/conf.d/$domain.conf | grep -q "diaspora_server"
+if [ $? != 0 ]
+then
+	sudo su - -c "cat $ori_path/../conf/nginx_upstream.conf >>/etc/nginx/conf.d/$domain.conf"
+fi
+
 sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
-sed -i "s@ALIASTOCHANGE@$final_path/@g" ../conf/nginx.conf
+sed -i "s@ROOTOCHANGE@$final_path/@g" ../conf/nginx.conf
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/diaspora.conf
 
 # Reload Nginx and regenerate SSOwat conf

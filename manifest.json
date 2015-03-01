@@ -21,14 +21,6 @@
                 "example": "domain.org"
             },
             {
-                "name": "path",
-                "ask": {
-                    "en": "Choose a path for Diaspora"
-                },
-                "example": "/diaspora",
-                "default": "/diaspora"
-            },
-            {
                 "name": "admin",
                 "ask": {
                     "en": "Choose the Diaspora administrator (must be an existing YunoHost user)"

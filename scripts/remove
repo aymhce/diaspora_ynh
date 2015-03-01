@@ -4,6 +4,7 @@ db_user=diaspora
 db_name=diaspora_production
 root_pwd=$(sudo cat /etc/yunohost/mysql)
 domain=$(sudo yunohost app setting diaspora domain)
+full_path=$(sudo yunohost app setting diaspora final_path)
 
 sudo service diaspora_ynh stop
 
@@ -13,8 +14,11 @@ sudo rm -f /etc/nginx/conf.d/$domain.d/diaspora.conf
 
 sudo service nginx reload
 
-sudo deluser --remove-home diaspora
-sudo rm -rf /var/www/diaspora
+sudo killall -u diaspora
+sleep 5
+sudo deluser --force --remove-home diaspora
+sudo rm -rf $full_path
 
 sudo update-rc.d -f diaspora_ynh remove
 sudo rm -f /etc/init.d/diaspora_ynh
+
