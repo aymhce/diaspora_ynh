@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Retrieve arguments
+domain=$(sudo yunohost app setting diaspora domain)
+admin=$(sudo yunohost app setting diaspora admin)
+final_path=$(sudo yunohost app setting diaspora final_path)
+
+sudo su - diaspora -c "rvm get stable"
+sudo su - diaspora -c "git checkout Gemfile.lock db/schema.rb ; git pull"
+sudo su - diaspora -c "bundle"
+sudo su - diaspora -c "RAILS_ENV=production bundle exec rake db:migrate"
+sudo su - diaspora -c "RAILS_ENV=production bundle exec rake tmp:cache:clear assets:precompile"
+
+sudo service diaspora_ynh restart
+

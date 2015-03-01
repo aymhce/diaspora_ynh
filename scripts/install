@@ -43,7 +43,7 @@ git clone -b master git://github.com/diaspora/diaspora.git
 sudo mkdir -p $final_path
 tar -cf source.tar.gz diaspora/
 mv source.tar.gz diaspora/public/source.tar.gz
-sudo cp -ar diaspora/* $final_path
+sudo cp -ar diaspora $final_path/../.
 
 # Generate random password
 
