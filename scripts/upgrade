@@ -11,5 +11,6 @@ sudo su - diaspora -c "bundle"
 sudo su - diaspora -c "RAILS_ENV=production bundle exec rake db:migrate"
 sudo su - diaspora -c "RAILS_ENV=production bundle exec rake tmp:cache:clear assets:precompile"
 
-sudo service diaspora_ynh restart
-
+sudo service diaspora_ynh stop
+sleep 3
+sudo service diaspora_ynh start
