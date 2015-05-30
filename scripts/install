@@ -80,7 +80,16 @@ sudo chown -R diaspora:diaspora $final_path
 sudo su - diaspora -c "curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t | bash;"
 #sudo su - diaspora -c "rvm autolibs read-fail ; rvm install 2.0 ; rvm use 2.0.0 --default"
 
+#add user to sudoers for install
+DIASPORASUDOERSCONF="diaspora ALL=(ALL:ALL) NOPASSWD: ALL #yunhost_diaspora"
+sudo cat /etc/sudoers | grep yunhost_diaspora -q
+if [ $? != 0 ] ; then sudo su -c "echo '$DIASPORASUDOERSCONF' >>/etc/sudoers" ; fi
+
 sudo su - diaspora -c "rvm install 2.0"
+
+#rm user from sudoers
+sudo cat /etc/sudoers | grep yunhost_diaspora -q
+if [ $? == 0 ] ; then sudo sed -i '/yunhost_diaspora/d' /etc/sudoers ; fi
 
 #sudo env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install
 sudo su - diaspora -c "env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install"
