@@ -85,7 +85,7 @@ DIASPORASUDOERSCONF="diaspora ALL=(ALL:ALL) NOPASSWD: ALL #yunhost_diaspora"
 sudo cat /etc/sudoers | grep yunhost_diaspora -q
 if [ $? != 0 ] ; then sudo su -c "echo '$DIASPORASUDOERSCONF' >>/etc/sudoers" ; fi
 
-sudo su - diaspora -c "rvm install 2.0"
+sudo su - diaspora -c "rvm install 2.1"
 
 #rm user from sudoers
 sudo cat /etc/sudoers | grep yunhost_diaspora -q
