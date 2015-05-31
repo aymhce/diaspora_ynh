@@ -107,7 +107,7 @@ sudo mv $final_path/.profile $final_path/.profile.bak
 sudo service diaspora_ynh start
 
 # install home page
-sudo cp ../conf/_show.html.haml $final_path/app/views/home/_show.html.haml
+#sudo cp ../conf/_show.html.haml $final_path/app/views/home/_show.html.haml
 
 # config nginx
 cat /etc/nginx/conf.d/$domain.conf | grep -q "diaspora_server"
