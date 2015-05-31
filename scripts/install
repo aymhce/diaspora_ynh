@@ -2,18 +2,18 @@
 
 # Retrieve arguments
 domain=$1
-user=$2
-is_public=$3
+#user=$2
+is_public=$2
 
 versionname=$(lsb_release -a | grep Codename | awk -F' ' '{print  $2}')
 
 # Check user parameter
-sudo yunohost user list --json | grep -q "\"username\": \"$user\""
-if [[ ! $? -eq 0 ]]; then
-    echo "Wrong user"
-    exit 1
-fi
-sudo yunohost app setting diaspora admin_user -v $user
+#sudo yunohost user list --json | grep -q "\"username\": \"$user\""
+#if [[ ! $? -eq 0 ]]; then
+#    echo "Wrong user"
+#    exit 1
+#fi
+#sudo yunohost app setting diaspora admin_user -v $user
 
 # Check domain/path availability
 sudo yunohost app checkurl $domain -a diaspora
