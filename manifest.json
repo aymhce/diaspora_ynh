@@ -16,14 +16,16 @@
             {
                 "name": "domain",
                 "ask": {
-                    "en": "Choose a domain for Diaspora"
+                    "en": "Choose a domain for Diaspora",
+                    "fr": "Choisissez un domaine pour Diaspora"
                 },
                 "example": "domain.org"
             },
             {
                 "name": "admin",
                 "ask": {
-                    "en": "Choose the Diaspora administrator (must be an existing YunoHost user)"
+                    "en": "Choose the Diaspora administrator (must be an existing YunoHost user)",
+                    "fr": "Choisissez l'administrateur de Diaspora (l'utilisateur YunoHost doit exister)"
                 },
                 "example": "homer"
             },
