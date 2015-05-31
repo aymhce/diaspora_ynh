@@ -35,7 +35,7 @@ check_unicorn() {
 }
 
 check_sidekiq() {
-    pgrep -f "sidekiq 2"
+    pgrep -f "sidekiq 3"
 }
 
 check_foreman() {
