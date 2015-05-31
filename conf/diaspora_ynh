@@ -198,7 +198,9 @@ case "$1" in
   restart|force-reload)
     [ "$VERBOSE" != no ] && log_daemon_msg "Restarting $DESC" "$NAME"
     do_stop
-    case "$?" in
+    ret=$?
+    sleep 5
+    case "$ret" in
       0|1)
         do_start
         case "$?" in
