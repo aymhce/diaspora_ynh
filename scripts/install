@@ -86,14 +86,12 @@ sudo cat /etc/sudoers | grep yunhost_diaspora -q
 if [ $? != 0 ] ; then sudo su -c "echo '$DIASPORASUDOERSCONF' >>/etc/sudoers" ; fi
 
 sudo su - diaspora -c "rvm install 2.1"
+sudo su - diaspora -c "env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install"
+sudo su - diaspora -c "gem install bundler"
 
 #rm user from sudoers
 sudo cat /etc/sudoers | grep yunhost_diaspora -q
 if [ $? == 0 ] ; then sudo sed -i '/yunhost_diaspora/d' /etc/sudoers ; fi
-
-#sudo env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install
-sudo su - diaspora -c "env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install"
-sudo su - diaspora -c "gem install bundler"
 
 # construct diaspora app
 sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development --retry 5"
