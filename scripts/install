@@ -77,8 +77,7 @@ sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-logi
 sudo chown -R diaspora:diaspora $final_path
 
 # Config RVM and force get app deps (for debug)
-sudo su - diaspora -c "curl -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl -L dspr.tk/1t | bash;"
-#sudo su - diaspora -c "rvm autolibs read-fail ; rvm install 2.0 ; rvm use 2.0.0 --default"
+sudo su - diaspora -c "curl --retry 5 -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl --retry 5 -L dspr.tk/1t | bash;"
 
 #add user to sudoers for install
 DIASPORASUDOERSCONF="diaspora ALL=(ALL:ALL) NOPASSWD: ALL #yunhost_diaspora"
