@@ -96,7 +96,7 @@ sudo su - diaspora -c "env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-u
 sudo su - diaspora -c "gem install bundler"
 
 # construct diaspora app
-sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development"
+sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development --retry 5"
 sudo su - diaspora -c "RAILS_ENV=production bundle exec rake db:create db:schema:load"
 sudo su - diaspora -c "RAILS_ENV=production bundle exec rake assets:precompile"
 
