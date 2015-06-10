@@ -86,7 +86,7 @@ if [ $? != 0 ] ; then sudo su -c "echo '$DIASPORASUDOERSCONF' >>/etc/sudoers" ; 
 
 sudo su - diaspora -c "rvm install 2.1"
 sudo su - diaspora -c "env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install"
-sudo su - diaspora -c "gem install bundler"
+sudo su - diaspora -c "x=1; RET=1; while [ $x -le 5 ] && [ \"$RET\" != 0 ] ; do gem install bundler ; RET=$? ; x=$(( $x + 1 )) ; done"
 
 #rm user from sudoers
 sudo cat /etc/sudoers | grep yunhost_diaspora -q
