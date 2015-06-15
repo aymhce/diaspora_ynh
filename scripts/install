@@ -93,7 +93,7 @@ sudo cat /etc/sudoers | grep yunhost_diaspora -q
 if [ $? == 0 ] ; then sudo sed -i '/yunhost_diaspora/d' /etc/sudoers ; fi
 
 # construct diaspora app
-sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development --retry 5"
+sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development --retry 10"
 sudo su - diaspora -c "RAILS_ENV=production bundle exec rake db:create db:schema:load"
 sudo su - diaspora -c "RAILS_ENV=production bundle exec rake assets:precompile"
 
