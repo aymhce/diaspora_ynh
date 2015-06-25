@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 db_user=diaspora
 db_name=diaspora_production
@@ -21,4 +21,3 @@ sudo rm -rf $full_path
 
 sudo update-rc.d -f diaspora_ynh remove
 sudo rm -f /etc/init.d/diaspora_ynh
-

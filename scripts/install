@@ -17,7 +17,8 @@ versionname=$(lsb_release -a | grep Codename | awk -F' ' '{print  $2}')
 
 # Check domain/path availability
 sudo yunohost app checkurl $domain -a diaspora
-if [[ ! $? -eq 0 ]]; then
+if [[ ! $? -eq 0 ]]
+then
     exit 1
 fi
 
@@ -27,21 +28,28 @@ full_url=https://$domain
 
 sudo yunohost app setting diaspora final_path -v $final_path
 
-# configure sys apt-get
+# Configure system apt-get
+cat /etc/os-release | grep -q wheezy
+if [ $? = 0 ]
+then
+    cat /etc/apt/sources.list | grep -q backports
+    if [ $? != 0 ]
+    then
+	sudo su -c "echo 'deb http://http.debian.net/debian wheezy-backports main' >> /etc/apt/sources.list"
+    fi
+fi
 
-cat /etc/apt/sources.list | grep -q backports
-[ $? != 0 ] && sudo su -c "echo 'deb http://http.debian.net/debian wheezy-backports main' >> /etc/apt/sources.list"
-
-# get sys deps
+# Get sys deps
 sudo apt-get update
-sudo apt-get install gawk libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake bison libffi-dev\
- build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libxslt-dev imagemagick ghostscript git curl libmysqlclient-dev\
- libmagickwand-dev nodejs-legacy npm -y
+sudo apt-get install -y -- \
+ gawk libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake bison libffi-dev \
+ build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libxslt-dev imagemagick ghostscript git curl libmysqlclient-dev \
+ libmagickwand-dev nodejs-legacy npm
 
 [ "$versionname" == "wheezy" ] && sudo apt-get install -t wheezy-backports redis-server -y
 [ "$versionname" != "wheezy" ] && sudo apt-get install redis-server -y
 
-# get source code
+# Get source code
 git clone -b master git://github.com/diaspora/diaspora.git
 
 sudo mkdir -p $final_path
@@ -50,7 +58,6 @@ mv source.tar.gz diaspora/public/source.tar.gz
 sudo cp -ar diaspora $final_path/../.
 
 # Generate random password
-
 db_pwd=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
 
 # Use 'diaspora' as database name and user
@@ -67,30 +74,36 @@ sed -i "s@DBPASSTOCHANGE@$db_pwd@g" ../conf/database.yml
 sudo cp ../conf/diaspora.yml $final_path/config/
 sudo cp ../conf/database.yml $final_path/config/
 
-# install startup script
+# Install startup script
 sudo cp ../conf/diaspora_ynh /etc/init.d/diaspora_ynh
 sudo chmod 754 /etc/init.d/diaspora_ynh
 sudo update-rc.d diaspora_ynh defaults
 
-# create and config user
+# Create and config user
 sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-login --quiet --home $final_path diaspora
 sudo chown -R diaspora:diaspora $final_path
 
 # Config RVM and force get app deps (for debug)
 sudo su - diaspora -c "curl --retry 5 -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl --retry 5 -L dspr.tk/1t | bash;"
 
-#add user to sudoers for install
+# Add user to sudoers for install
 DIASPORASUDOERSCONF="diaspora ALL=(ALL:ALL) NOPASSWD: ALL #yunhost_diaspora"
 sudo cat /etc/sudoers | grep yunhost_diaspora -q
-if [ $? != 0 ] ; then sudo su -c "echo '$DIASPORASUDOERSCONF' >>/etc/sudoers" ; fi
+if [ $? != 0 ]
+then
+    sudo su -c "echo '$DIASPORASUDOERSCONF' >> /etc/sudoers"
+fi
 
 sudo su - diaspora -c "rvm install 2.1"
 sudo su - diaspora -c "env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install"
 sudo su - diaspora -c "x=1; RET=1; while [ \$x -le 5 ] && [ \"\$RET\" != 0 ] ; do gem install bundler ; RET=\$? ; x=\$(( \$x + 1 )) ; done"
 
-#rm user from sudoers
+# Remove user from sudoers
 sudo cat /etc/sudoers | grep yunhost_diaspora -q
-if [ $? == 0 ] ; then sudo sed -i '/yunhost_diaspora/d' /etc/sudoers ; fi
+if [ $? == 0 ]
+then
+    sudo sed -i '/yunhost_diaspora/d' /etc/sudoers
+fi
 
 # construct diaspora app
 sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development --retry 10"
@@ -99,11 +112,11 @@ sudo su - diaspora -c "RAILS_ENV=production bundle exec rake assets:precompile"
 
 cd $ori_path
 
-# debug foreman module and start service
+# Debug foreman module and start service
 sudo mv $final_path/.profile $final_path/.profile.bak
 sudo service diaspora_ynh start
 
-# install home page
+# Install home page
 sudo cp ../conf/_show.html.haml $final_path/app/views/home/_show.html.haml
 
 # config nginx
@@ -123,11 +136,9 @@ sudo service nginx reload
 sudo yunohost app setting diaspora skipped_uris -v "/"
 sudo yunohost app ssowatconf
 
-#protect URIs
-
-if [ $is_public = "No" ];
+# Protect URIs
+if [ $is_public = "no" -o $is_public = "NO" -o $is_public = "No" ]
 then
     sudo yunohost app setting diaspora protected_uris -v "/"
     sudo yunohost app ssowatconf
 fi
-

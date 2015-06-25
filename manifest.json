@@ -8,7 +8,7 @@
     "developer": {
         "name": "aymhce",
         "email": "aymhce@gmail.com",
-        "url": "http://diasporafoundation.org"
+        "url": "https://diasporafoundation.org"
     },
     "multi_instance": "true",
     "arguments": {
@@ -16,18 +16,18 @@
             {
                 "name": "domain",
                 "ask": {
-                    "en": "Choose a domain for Diaspora",
-                    "fr": "Choisissez un domaine pour Diaspora"
+                    "en": "Choose a domain for diaspora*",
+                    "fr": "Choisissez un domaine pour diaspora*"
                 },
                 "example": "domain.org"
             },
             {
                 "name": "public_site",
                 "ask": {
-                    "en": "Is it a public Diaspora site ?",
+                    "en": "Is it a public Diaspora site?",
                     "fr": "Est-ce un site public ?"
                 },
-                "choices": ["Yes", "No"],
+                "choices": ["yes", "YES", "Yes", "no", "NO", "No"],
                 "default": "Yes"
             }
         ]
