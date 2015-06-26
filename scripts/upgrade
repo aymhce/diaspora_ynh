@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Retrieve arguments
 domain=$(sudo yunohost app setting diaspora domain)
