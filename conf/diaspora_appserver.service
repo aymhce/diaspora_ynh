@@ -1,0 +1,17 @@
+[Unit]
+Description=Diaspora social network (application server)
+PartOf=diaspora.target
+StopWhenUnneeded=true
+
+[Service]
+User=diaspora
+WorkingDirectory=/var/www/diaspora
+Environment=RAILS_ENV=production
+ExecStart=/var/www/diaspora/.rvm/scripts/extras/chruby.sh 2.2 -- bin/bundle exec puma -b unix:///var/run/diaspora/diaspora.sock -e $RAILS_ENV
+Restart=always
+CPUAccounting=true
+MemoryAccounting=true
+BlockIOAccounting=true
+
+[Install]
+WantedBy=diaspora.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Diaspora social network
+Wants=redis.service mysqld.service
+After=redis.service mysqld.service
+StopWhenUnneeded=true
+
+[Install]
+WantedBy=multi-user.target

@@ -2,18 +2,10 @@
 
 # Retrieve arguments
 domain=$1
-#user=$2
 is_public=$2
 
-versionname=$(lsb_release -a | grep Codename | awk -F' ' '{print  $2}')
-
-# Check user parameter
-#sudo yunohost user list --json | grep -q "\"username\": \"$user\""
-#if [[ ! $? -eq 0 ]]; then
-#    echo "Wrong user"
-#    exit 1
-#fi
-#sudo yunohost app setting diaspora admin_user -v $user
+# Source YunoHost helpers
+. /usr/share/yunohost/helpers
 
 # Check domain/path availability
 sudo yunohost app checkurl $domain -a diaspora
@@ -28,29 +20,17 @@ full_url=https://$domain
 
 sudo yunohost app setting diaspora final_path -v $final_path
 
-# Configure system apt-get
-cat /etc/os-release | grep -q wheezy
-if [ $? = 0 ]
-then
-    cat /etc/apt/sources.list | grep -q backports
-    if [ $? != 0 ]
-    then
-	sudo su -c "echo 'deb http://http.debian.net/debian wheezy-backports main' >> /etc/apt/sources.list"
-    fi
-fi
-
 # Get sys deps
 sudo apt-get update
 sudo apt-get install -y -- \
  gawk libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake bison libffi-dev \
  build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libxslt-dev imagemagick ghostscript git curl libmysqlclient-dev \
- libmagickwand-dev nodejs-legacy npm
-
-[ "$versionname" == "wheezy" ] && sudo apt-get install -t wheezy-backports redis-server -y
-[ "$versionname" != "wheezy" ] && sudo apt-get install redis-server -y
+ libmagickwand-dev nodejs-legacy npm redis-server
 
 # Get source code
 git clone -b master git://github.com/diaspora/diaspora.git
+
+echo $(pwd)
 
 sudo mkdir -p $final_path
 tar -cf source.tar.gz diaspora/
@@ -61,11 +41,11 @@ sudo cp -ar diaspora $final_path/../.
 db_pwd=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
 
 # Use 'diaspora' as database name and user
-db_user=diaspora 
+db_user=diaspora
 
 # Initialize database and store mysql password for upgrade
-sudo yunohost app initdb $db_user -p $db_pwd -d diaspora_production
-sudo yunohost app setting diaspora mysqlpwd -v $db_pwd
+sudo yunohost app setting diaspora mysqlpwd -v "$db_pwd"
+ynh_mysql_create_db diaspora_production "$db_user" "$db_pwd"
 
 # prepare and copy diaspora config file
 sed -i "s@FULLURLTOCHANGE@$full_url@g" ../conf/diaspora.yml
@@ -85,6 +65,7 @@ sudo chown -R diaspora:diaspora $final_path
 
 # Config RVM and force get app deps (for debug)
 sudo su - diaspora -c "curl --retry 5 -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl --retry 5 -L dspr.tk/1t | bash;"
+sudo su - diaspora -c "curl --retry 5 -sSL https://s.diaspora.software/1t | bash;"
 
 # Add user to sudoers for install
 DIASPORASUDOERSCONF="diaspora ALL=(ALL:ALL) NOPASSWD: ALL #yunhost_diaspora"

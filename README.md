@@ -8,8 +8,10 @@ Notes
 
 Before installing, you have to:
 
-- get a valid SSL certificate (can use [startssl.com](https://www.startssl.com/))
 - get a dedicated domain (must install under web root like **https://diaspora.example.com/** not **https://example.com/diaspora/**)
+- get a valid SSL certificate
+  - can use [letsencrypt](https://letsencrypt.org/) with this fun [app](https://github.com/alexAubin/letsencrypt_ynh) of alexAubin :)
+  - or more hard, can use [startssl.com](https://www.startssl.com/)
 
 Installation effects:
 
@@ -17,8 +19,8 @@ Installation effects:
 - The installation directory can take up to 700MB and app start time can be take 5 minutes.
 
 Make yourself (your account) an admin:
-- https://wiki.diasporafoundation.org/FAQ_for_pod_maintainers#What_are_roles_and_how_do_I_use_them.3F_.2F_Make_yourself_an_admin
+- https://wiki.diasporafoundation.org/FAQ_for_pod_maintainers#What_are_roles_and_how_do_I_use_them.3F_.2F_Make_yourself_an_admin_or_assign_moderators
 
 Not implement yet:
 
-- There are not yet active SSO/LDAP integration.
+- backup and restart scripts.
