@@ -63,9 +63,9 @@ sudo update-rc.d diaspora_ynh defaults
 sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-login --quiet --home $final_path diaspora
 sudo chown -R diaspora:diaspora $final_path
 
-# Config RVM and force get app deps (for debug)
+# Config RVM and force get app deps (for debug) and add hack for installation
 sudo su - diaspora -c "curl --retry 5 -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl --retry 5 -L dspr.tk/1t | bash;"
-sudo su - diaspora -c "curl --retry 5 -sSL https://s.diaspora.software/1t | bash;"
+sudo su - diaspora -c "curl --retry 5 -sSL https://s.diaspora.software/1t | sed 's# bash # sed \"s/noexec/noexechack/g\" | bash #g' | bash ;"
 
 # Add user to sudoers for install
 DIASPORASUDOERSCONF="diaspora ALL=(ALL:ALL) NOPASSWD: ALL #yunhost_diaspora"
@@ -90,7 +90,6 @@ fi
 #sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development --with mysql --retry 10"
 #sudo su - diaspora -c "RAILS_ENV=production bundle exec rake db:create db:schema:load"
 #sudo su - diaspora -c "RAILS_ENV=production bundle exec rake assets:precompile"
-sudo su - diaspora -c "gem install bundler"
 sudo su - diaspora -c "RAILS_ENV=production bin/bundle install --jobs $(nproc) --deployment --without test development --with mysql --retry 10"
 sudo su - diaspora -c "RAILS_ENV=production bin/rake db:create db:schema:load"
 sudo su - diaspora -c "RAILS_ENV=production bin/rake assets:precompile"
