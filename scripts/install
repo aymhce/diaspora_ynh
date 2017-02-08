@@ -75,7 +75,7 @@ then
     sudo su -c "echo '$DIASPORASUDOERSCONF' >> /etc/sudoers"
 fi
 
-sudo su - diaspora -c "rvm install 2.1"
+sudo su - diaspora -c "rvm install 2.3"
 sudo su - diaspora -c "env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install"
 sudo su - diaspora -c "x=1; RET=1; while [ \$x -le 5 ] && [ \"\$RET\" != 0 ] ; do gem install bundler ; RET=\$? ; x=\$(( \$x + 1 )) ; done"
 
@@ -87,9 +87,13 @@ then
 fi
 
 # construct diaspora app
-sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development --retry 10"
-sudo su - diaspora -c "RAILS_ENV=production bundle exec rake db:create db:schema:load"
-sudo su - diaspora -c "RAILS_ENV=production bundle exec rake assets:precompile"
+#sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development --with mysql --retry 10"
+#sudo su - diaspora -c "RAILS_ENV=production bundle exec rake db:create db:schema:load"
+#sudo su - diaspora -c "RAILS_ENV=production bundle exec rake assets:precompile"
+sudo su - diaspora -c "gem install bundler"
+sudo su - diaspora -c "RAILS_ENV=production bin/bundle install --jobs $(nproc) --deployment --without test development --with mysql --retry 10"
+sudo su - diaspora -c "RAILS_ENV=production bin/rake db:create db:schema:load"
+sudo su - diaspora -c "RAILS_ENV=production bin/rake assets:precompile"
 
 cd $ori_path
 
