@@ -3,6 +3,12 @@ diaspora_ynh
 
 Diaspora integration for YunoHost
 
+ETAT = NOT WORKING
+
+Ne pas installer en production 
+
+Do not install this app in production
+
 Notes
 --------------
 
@@ -10,8 +16,6 @@ Before installing, you have to:
 
 - get a dedicated domain (must install under web root like **https://diaspora.example.com/** not **https://example.com/diaspora/**)
 - get a valid SSL certificate
-  - example, can use letsencrypt with this fun [app](https://github.com/YunoHost-Apps/letsencrypt_ynh) of alexAubin :), or more hard, can use [startssl.com](https://www.startssl.com/)
-  - also, you can integrate manually your own valid certificate
 
 Installation effects:
 
