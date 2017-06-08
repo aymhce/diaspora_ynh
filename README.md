@@ -28,3 +28,5 @@ Make yourself (your account) an admin:
 Not implement yet:
 
 - backup and restart scripts.
+
+Report a bug: https://github.com/YunoHost-Apps/diaspora_ynh/issues
