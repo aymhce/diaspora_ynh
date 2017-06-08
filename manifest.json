@@ -9,8 +9,8 @@
     },
     "licence": "free",
     "maintainer": {
-        "name": "aymhce",
-        "email": "aymhce@gmail.com"
+        "name": "rafi59",
+        "email": ""
     },
     "requirements": {
         "yunohost": ">> 2.3.12.1"
