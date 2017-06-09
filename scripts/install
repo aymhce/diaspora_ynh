@@ -16,7 +16,7 @@ is_public=$YNH_APP_ARG_DOMAIN
 
 # Save app settings
 
-ynh_app_setting_set "$app" is_public "$is_public"
+ynh_app_setting_set $app is_public $is_public
 
 
 # Check domain/path availability
