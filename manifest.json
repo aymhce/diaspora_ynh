@@ -7,7 +7,7 @@
         "en": "Distributed social networking service",
         "fr": "Service de réseau social distribué"
     },
-    "licence": "free",
+    "license": "free",
     "maintainer": {
         "name": "rafi59",
         "email": ""
@@ -16,6 +16,10 @@
         "yunohost": ">> 2.3.12.1"
     },
     "multi_instance": "false",
+    "services": [
+        "nginx",
+        "php5-fpm",
+	"mysql"
     "arguments": {
         "install" : [
             {
