@@ -33,7 +33,7 @@
                 "example": "domain.org"
             },
             {
-                "name": "site_public",
+                "name": "is_public",
 		"type": "boolean",
                 "ask": {
                     "en": "Is it a public Diaspora site?",
