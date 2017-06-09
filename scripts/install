@@ -65,7 +65,7 @@ ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
 
 # # Load initial SQL into the new database
 ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" \
-  #  < "../sources/sql/mysql.init.sql"
+   < "../sources/sql/mysql.init.sql"
 ### MySQL end ###
 
 
