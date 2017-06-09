@@ -7,7 +7,7 @@ set -eu
 domain=$YUNOHOST_APP_ARG_DOMAIN
 is_public=$YUNOHOST_APP_ARG_IS_PUBLIC
 
-# Save app settings
+# Save app setting
 
 ynh_app_setting_set "$app" is_public "$is_public"
 
