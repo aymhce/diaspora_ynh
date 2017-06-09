@@ -1,6 +1,6 @@
 diaspora_ynh
 ==========
-
+[![GitHub issues](https://img.shields.io/github/issues/badges/shields.svg)]()
 Diaspora integration for YunoHost
 
 ETAT = NOT WORKING
