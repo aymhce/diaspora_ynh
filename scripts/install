@@ -17,7 +17,7 @@ is_public=$YNH_APP_ARG_DOMAIN
 # Save app settings
 
 ynh_app_setting_set $app is_public $is_public
-
+ynh_app_setting_set $app domain $domain
 
 # Check domain/path availability
 sudo yunohost app checkurl $domain -a "$app" \
@@ -31,11 +31,13 @@ full_url=https://$domain
 sudo yunohost app setting diaspora final_path -v $final_path
 
 # Get sys deps
+sudo curl -sL https://deb.nodesource.com/setup_7.x | sudo bash -
+sudo apt-get install -yy -qq nodejs
 sudo apt-get update
 sudo apt-get install -y -- \
  gawk libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake bison libffi-dev \
  build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libxslt-dev imagemagick ghostscript git curl libmysqlclient-dev \
- libmagickwand-dev nodejs-legacy npm redis-server
+ libmagickwand-dev redis-server
 
 # Get source code
 git clone -b master https://github.com/diaspora/diaspora
@@ -47,21 +49,17 @@ tar -cf source.tar.gz diaspora/
 mv source.tar.gz diaspora/public/source.tar.gz
 sudo cp -ar diaspora $final_path/../.
 
-### MySQL ###
-# If your app use a MySQL database you can use these lines to bootstrap
-# a database, an associated user and save the password in app settings.
+# DATABASE
++db_name=$app
++db_user=$app
++db_pwd=$(ynh_string_random)
++ynh_mysql_create_db "$db_name" "$db_user" "$db_pass"
++ynh_app_setting_set "$app" db_name "$db_name"
++ynh_app_setting_set "$app" db_pass "$db_pass"
++ynh_app_setting_set "$app" db_user "$db_user"
++ynh_app_setting_set "$app" mysqlpwd "$db_pass"
 
-# Generate MySQL password and create database
- dbuser=$app
- dbname=$app
- dbpass=$(ynh_string_random 12)
-ynh_app_setting_set "$app" mysqlpwd "$dbpass"
- ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
 
-# Load initial SQL into the new database
- ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" \
-#     < "../sources/sql/mysql.init.sql"
-### MySQL end ###
 
 # prepare and copy diaspora config file
 sed -i "s@FULLURLTOCHANGE@$full_url@g" ../conf/diaspora.yml
