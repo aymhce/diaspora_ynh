@@ -3,6 +3,8 @@
 # Exit on command errors and treat unset variables as an error
 set -eu
 
+app=$YUNOHOST_APP_INSTANCE_NAME
+
 # Retrieve arguments
 domain=$YUNOHOST_APP_ARG_DOMAIN
 is_public=$YUNOHOST_APP_ARG_IS_PUBLIC
@@ -12,7 +14,7 @@ is_public=$YUNOHOST_APP_ARG_IS_PUBLIC
 ynh_app_setting_set "$app" is_public "$is_public"
 
 # Source YunoHost helpers
-. /usr/share/yunohost/helpers
+source /usr/share/yunohost/helpers
 
 # Check domain/path availability
 sudo yunohost app checkurl $domain -a "$app" \
