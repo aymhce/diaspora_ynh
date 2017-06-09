@@ -20,7 +20,7 @@
         "nginx",
         "php5-fpm",
 	"mysql"
-	   ]
+	   ],
     "arguments": {
         "install" : [
             {
