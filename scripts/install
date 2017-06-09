@@ -9,6 +9,9 @@ set -eu
 source _common.sh
 source /usr/share/yunohost/helpers
 
+# App variable
+
+app=$YNH_APP_INSTANCE_NAME
 
 # Retrieve arguments
 domain=$YNH_APP_ARG_DOMAIN
