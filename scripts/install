@@ -11,8 +11,8 @@ source /usr/share/yunohost/helpers
 
 
 # Retrieve arguments
-domain=$YUNOHOST_APP_ARG_DOMAIN
-is_public=$YUNOHOST_APP_ARG_IS_PUBLIC
+domain=$YNH_APP_ARG_DOMAIN
+is_public=$YNH_APP_ARG_DOMAIN
 
 # Save app settings
 
