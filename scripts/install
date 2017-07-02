@@ -31,7 +31,7 @@ ori_path=$(pwd)
 final_path=/var/www/diaspora
 full_url=https://$domain
 
-sudo yunohost app setting diaspora final_path -v $final_path
+ynh_app_setting_set diaspora final_path -v $final_path
 
 # Get sys deps
 sudo curl -sL https://deb.nodesource.com/setup_7.x | sudo bash -
