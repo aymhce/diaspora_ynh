@@ -140,12 +140,12 @@ sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/diaspora.conf
 # Reload Nginx and regenerate SSOwat conf
 
 sudo service nginx reload
-sudo yunohost app setting diaspora skipped_uris -v "/"
+ynh_app_setting_set diaspora skipped_uris -v "/"
 sudo yunohost app ssowatconf
 
 # Protect URIs
 if [ $is_public = "no" -o $is_public = "NO" -o $is_public = "No" ]
 then
-    sudo yunohost app setting diaspora protected_uris -v "/"
+    ynh_app_setting_set diaspora protected_uris -v "/"
     sudo yunohost app ssowatconf
 fi
