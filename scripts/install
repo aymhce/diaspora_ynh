@@ -1,151 +1,204 @@
 #!/bin/bash
 
-# Exit on command errors and treat unset variables as an error
-set -eu
-
+#=================================================
+# GENERIC START
+#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
 source _common.sh
 source /usr/share/yunohost/helpers
 
-# App variable
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
 
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
+
+domain=$YNH_APP_ARG_DOMAIN
+path_url=$YNH_APP_ARG_PATH
+admin=$YNH_APP_ARG_ADMIN
+is_public=$YNH_APP_ARG_IS_PUBLIC
+language=$YNH_APP_ARG_LANGUAGE
+
+# This is a multi-instance app, meaning it can be installed several times independently
+# The id of the app as stated in the manifest is available as $YNH_APP_ID
+# The instance number is available as $YNH_APP_INSTANCE_NUMBER (equals "1", "2", ...)
+# The app instance name is available as $YNH_APP_INSTANCE_NAME
+#    - the first time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample
+#    - the second time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample__2
+#    - ynhexample__{N} for the subsequent installations, with N=3,4, ...
+# The app instance name is probably what you are interested the most, since this is
+# guaranteed to be unique. This is a good unique identifier to define installation path,
+# db names, ...
 app=$YNH_APP_INSTANCE_NAME
 
-# Retrieve arguments
-domain=$YNH_APP_ARG_DOMAIN
-is_public=$YNH_APP_ARG_DOMAIN
+#=================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#=================================================
 
-# Save app settings
+# Normalize the url path syntax
+path_url=$(ynh_normalize_url_path $path_url)
 
-ynh_app_setting_set $app is_public $is_public
+# Check web path availability
+ynh_webpath_available $domain $path_url
+# Register (book) web path
+ynh_webpath_register $app $domain $path_url
+
+final_path=/var/www/$app
+test ! -e "$final_path" || ynh_die "This path already contains a folder"
+
+#=================================================
+# STORE SETTINGS FROM MANIFEST
+#=================================================
+
 ynh_app_setting_set $app domain $domain
+ynh_app_setting_set $app path $path_url
+ynh_app_setting_set $app admin $admin
+ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set $app language $language
 
-# Check domain/path availability
-sudo yunohost app checkurl $domain -a "$app" \
-    || ynh_die "Domain not available: ${domain}${path_url}"
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+# FIND AND OPEN A PORT
+#=================================================
 
+# Find a free port
+port=$(ynh_find_port 8095)
+# Open this port
+yunohost firewall allow --no-upnp TCP $port 2>&1
+ynh_app_setting_set $app port $port
 
-ori_path=$(pwd)
-final_path=/var/www/diaspora
-full_url=https://$domain
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
 
-ynh_app_setting_set diaspora final_path -v $final_path
-
-# Get sys deps
-sudo curl -sL https://deb.nodesource.com/setup_7.x | sudo bash -
-sudo apt-get install -yy -qq nodejs
-sudo apt-get update
-sudo apt-get install -y -- \
- gawk libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake bison libffi-dev \
+ynh_install_app_dependencies  gawk libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake bison libffi-dev \
  build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libxslt-dev imagemagick ghostscript git curl libmysqlclient-dev \
- libmagickwand-dev redis-server
+libmagickwand-dev redis-server
 
-# Get source code
-git clone -b master https://github.com/diaspora/diaspora
+#=================================================
+# CREATE A MYSQL DATABASE
+#=================================================
+# If your app uses a MySQL database, you can use these lines to bootstrap
+# a database, an associated user and save the password in app settings
 
-echo $(pwd)
+db_name=$(ynh_sanitize_dbid $app)
+ynh_app_setting_set $app db_name $db_name
+ynh_mysql_setup_db $db_name $db_name
 
-sudo mkdir -p $final_path
-tar -cf source.tar.gz diaspora/
-mv source.tar.gz diaspora/public/source.tar.gz
-sudo cp -ar diaspora $final_path/../.
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
 
-### MySQL ###
-# If your app use a MySQL database you can use these lines to bootstrap
-# a database, an associated user and save the password in app settings.
+ynh_app_setting_set $app final_path $final_path
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source "$final_path"
 
-# # Generate MySQL password and create database
-dbuser=$app
-dbname=$app
-dbpass=$(ynh_string_random 12)
-ynh_app_setting_set "$app" mysqlpwd "$dbpass"
-ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
 
-# # Load initial SQL into the new database
-ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" \
-   < "../sources/sql/mysql.init.sql"
-### MySQL end ###
+# Create a dedicated nginx config
+ynh_add_nginx_config
 
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
 
+# Create a system user
+ynh_system_user_create $app
 
-# prepare and copy diaspora config file
-sed -i "s@FULLURLTOCHANGE@$full_url@g" ../conf/diaspora.yml
-sed -i "s@DBUSERTOCHANGE@$db_user@g" ../conf/database.yml
-sed -i "s@DBPASSTOCHANGE@$db_pwd@g" ../conf/database.yml
-sudo cp ../conf/diaspora.yml $final_path/config/
-sudo cp ../conf/database.yml $final_path/config/
+#=================================================
+# PHP-FPM CONFIGURATION
+#=================================================
 
-# Install startup script
-sudo cp ../conf/diaspora_ynh /etc/init.d/diaspora_ynh
-sudo chmod 754 /etc/init.d/diaspora_ynh
-sudo update-rc.d diaspora_ynh defaults
+# Create a dedicated php-fpm config
+ynh_fpm_config
 
-# Create and config user
-sudo adduser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-login --quiet --home $final_path diaspora
-sudo chown -R diaspora:diaspora $final_path
+#=================================================
+# SPECIFIC SETUP
+#=================================================
+# ...
+#=================================================
 
-# Config RVM and force get app deps (for debug) and add hack for installation
-sudo su - diaspora -c "curl --retry 5 -sSL https://rvm.io/mpapis.asc | gpg --import - ; curl --retry 5 -L dspr.tk/1t | bash;"
-sudo su - diaspora -c "curl --retry 5 -sSL https://s.diaspora.software/1t | sed 's# bash # sed \"s/noexec/noexechack/g\" | bash #g' | bash ;"
+#=================================================
+# SETUP SYSTEMD
+#=================================================
 
-# Add user to sudoers for install
-DIASPORASUDOERSCONF="diaspora ALL=(ALL:ALL) NOPASSWD: ALL #yunhost_diaspora"
-sudo cat /etc/sudoers | grep yunhost_diaspora -q
-if [ $? != 0 ]
+# Create a dedicated systemd config
+ynh_systemd_config
+
+#=================================================
+# SETUP APPLICATION WITH CURL
+#=================================================
+
+# Set right permissions for curl install
+chown -R $app: $final_path
+
+# Set the app as temporarily public for curl call
+ynh_app_setting_set $app unprotected_uris "/"
+# Reload SSOwat config
+yunohost app ssowatconf
+
+# Reload Nginx
+systemctl reload nginx
+
+# Installation with curl
+ynh_local_curl "/INSTALL_PATH" "key1=value1" "key2=value2" "key3=value3"
+
+#=================================================
+# STORE THE CHECKSUM OF THE CONFIG FILE
+#=================================================
+
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum "$final_path/CONFIG_FILE"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# SECURE FILES AND DIRECTORIES
+#=================================================
+
+# Set permissions to app files
+chown -R root: $final_path
+
+#=================================================
+# SETUP LOGROTATE
+#=================================================
+
+# Use logrotate to manage application logfile(s)
+ynh_use_logrotate
+
+#=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+
+yunohost service add NAME_INIT.D --log "/var/log/FILE.log"
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+
+if [ $is_public -eq 0 ]
+then	# Remove the public access
+	ynh_app_setting_delete $app skipped_uris
+fi
+# Make app public if necessary
+if [ $is_public -eq 1 ]
 then
-    sudo su -c "echo '$DIASPORASUDOERSCONF' >> /etc/sudoers"
+	# unprotected_uris allows SSO credentials to be passed anyway.
+	ynh_app_setting_set $app unprotected_uris "/"
 fi
 
-sudo su - diaspora -c "rvm install 2.3"
-sudo su - diaspora -c "env REALLY_GEM_UPDATE_SYSTEM=1 gem update --system --no-user-install"
-sudo su - diaspora -c "x=1; RET=1; while [ \$x -le 5 ] && [ \"\$RET\" != 0 ] ; do gem install bundler ; RET=\$? ; x=\$(( \$x + 1 )) ; done"
+#=================================================
+# RELOAD NGINX
+#=================================================
 
-# Remove user from sudoers
-sudo cat /etc/sudoers | grep yunhost_diaspora -q
-if [ $? == 0 ]
-then
-    sudo sed -i '/yunhost_diaspora/d' /etc/sudoers
-fi
-
-# construct diaspora app
-#sudo su - diaspora -c "RAILS_ENV=production bundle install --without test development --with mysql --retry 10"
-#sudo su - diaspora -c "RAILS_ENV=production bundle exec rake db:create db:schema:load"
-#sudo su - diaspora -c "RAILS_ENV=production bundle exec rake assets:precompile"
-sudo su - diaspora -c "RAILS_ENV=production bin/bundle install --jobs $(nproc) --deployment --without test development --with mysql --retry 10"
-sudo su - diaspora -c "RAILS_ENV=production bin/rake db:create db:schema:load"
-sudo su - diaspora -c "RAILS_ENV=production bin/rake assets:precompile"
-
-cd $ori_path
-
-# Debug foreman module and start service
-sudo mv $final_path/.profile $final_path/.profile.bak
-sudo service diaspora_ynh start
-
-# Install home page
-sudo cp ../conf/_show.html.haml $final_path/app/views/home/_show.html.haml
-
-# config nginx
-cat /etc/nginx/conf.d/$domain.conf | grep -q "diaspora_server"
-if [ $? != 0 ]
-then
-	sudo su - -c "cat $ori_path/../conf/nginx_upstream.conf >>/etc/nginx/conf.d/$domain.conf"
-fi
-
-sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
-sed -i "s@ROOTOCHANGE@$final_path/@g" ../conf/nginx.conf
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/diaspora.conf
-
-# Reload Nginx and regenerate SSOwat conf
-
-sudo service nginx reload
-ynh_app_setting_set diaspora skipped_uris -v "/"
-sudo yunohost app ssowatconf
-
-# Protect URIs
-if [ $is_public = "no" -o $is_public = "NO" -o $is_public = "No" ]
-then
-    ynh_app_setting_set diaspora protected_uris -v "/"
-    sudo yunohost app ssowatconf
-fi
+systemctl reload nginx
