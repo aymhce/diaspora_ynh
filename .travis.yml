@@ -4,4 +4,4 @@ python:
     - "3.5"
 script:
   - git clone https://github.com/YunoHost/package_linter
-- python package_linter/package_linter.py
+  - python package_linter/package_linter.py .
