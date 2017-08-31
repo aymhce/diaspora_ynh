@@ -1,6 +1,8 @@
 diaspora_ynh
 ==========
 
+![](https://travis-ci.org/YunoHost-Apps/diaspora_ynh.svg)
+
 Diaspora integration for YunoHost
 
 ETAT = IN PROGRESS
