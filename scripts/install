@@ -76,9 +76,7 @@ ynh_app_setting_set $app port $port
 # INSTALL DEPENDENCIES
 #=================================================
 
-ynh_install_app_dependencies  gawk libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake bison libffi-dev \
- build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libxslt-dev imagemagick ghostscript git curl libmysqlclient-dev \
-libmagickwand-dev redis-server
+ynh_install_app_dependencies build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libxslt-dev imagemagick ghostscript curl libmagickwand-dev git libmysqlclient-dev redis-server nodejs
 
 #=================================================
 # CREATE A MYSQL DATABASE
@@ -96,7 +94,14 @@ ynh_mysql_setup_db $db_name $db_name
 
 ynh_app_setting_set $app final_path $final_path
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source "$final_path"
+su diaspora
+cd ~
+git clone -b master https://github.com/diaspora/diaspora.git
+cd diaspora
+config/database.yml
+cp config/diaspora.yml
+gem install bundler
+RAILS_ENV=production bin/bundle install --jobs $(nproc) --deployment --without test development --with mysql
 
 #=================================================
 # NGINX CONFIGURATION
@@ -113,16 +118,7 @@ ynh_add_nginx_config
 ynh_system_user_create $app
 
 #=================================================
-# PHP-FPM CONFIGURATION
-#=================================================
-
-# Create a dedicated php-fpm config
-ynh_fpm_config
-
-#=================================================
 # SPECIFIC SETUP
-#=================================================
-# ...
 #=================================================
 
 #=================================================
