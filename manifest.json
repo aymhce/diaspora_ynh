@@ -8,6 +8,7 @@
         "fr": "Service de réseau social distribué"
     },
     "license": "free",
+	"version": "1.0",
     "maintainer": {
         "name": "rafi59",
         "email": ""
