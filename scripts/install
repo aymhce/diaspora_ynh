@@ -93,8 +93,8 @@ ynh_mysql_setup_db $db_name $db_name
 #=================================================
 
 # Create a system user
-#ynh_system_user_create $app
-adduser --disabled-login diaspora
+ynh_system_user_create $app
+
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
