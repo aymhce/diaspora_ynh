@@ -8,7 +8,12 @@ full_path=$(sudo yunohost app setting diaspora final_path)
 
 sudo service diaspora_ynh stop
 
-mysql -u root -p$root_pwd -e "DROP DATABASE $db_name ; DROP USER $db_user@localhost ;"
+#=================================================
+# REMOVE THE MYSQL DATABASE
+#=================================================
+
+# Remove a database if it exists, along with the associated user
+ynh_mysql_remove_db $db_name $db_name
 
 sudo rm -f /etc/nginx/conf.d/$domain.d/diaspora.conf
 
