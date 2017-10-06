@@ -89,6 +89,13 @@ ynh_app_setting_set $app db_name $db_name
 ynh_mysql_setup_db $db_name $db_name
 
 #=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+# Create a system user
+ynh_system_user_create $app
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
@@ -109,13 +116,6 @@ RAILS_ENV=production bin/bundle install --jobs $(nproc) --deployment --without t
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-
-# Create a system user
-ynh_system_user_create $app
 
 #=================================================
 # SPECIFIC SETUP
