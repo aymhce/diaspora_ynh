@@ -5,8 +5,7 @@ diaspora_ynh
 
 Diaspora integration for YunoHost
 
-ETAT = IN PROGRESS
-
+ETAT = NOT WORKING
 Ne pas installer en production 
 
 Do not install this app in production
