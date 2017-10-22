@@ -108,6 +108,8 @@ git clone -b master https://github.com/diaspora/diaspora.git
 cd diaspora
 config/database.yml
 cp config/diaspora.yml
+curl -L https://s.diaspora.software/1t | bash
+echo [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" | tee ~/.bashrc
 gem install bundler
 RAILS_ENV=production bin/bundle install --jobs $(nproc) --deployment --without test development --with mysql
 
