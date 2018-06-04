@@ -1,6 +1,0 @@
-language: lxc
-python:
-    - "3.5"
-script:
-  - git clone https://github.com/YunoHost/CI_package_check
-  - ./analyseCI.sh "https://github.com/YunoHost-Apps/diaspora_ynh" "diaspora_ynh"
