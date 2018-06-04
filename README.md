@@ -1,5 +1,9 @@
 diaspora_ynh
 ==========
+
+Ce dépôt est un mirror, merci de soumettre vos Pull Requests sur https://framagit.org/YunoHost-Apps/diaspora_ynh
+This repository is only a mirror please submit Pull Requests and issues on https://framagit.org/YunoHost-Apps/diaspora_ynh
+
 [![Build Status](https://ci-apps-dev.yunohost.org/jenkins/job/diaspora_ynh%20(Rafi59)/badge/icon)](https://ci-apps-dev.yunohost.org/jenkins/job/diaspora_ynh%20(Rafi59)/)
 
 Diaspora integration for YunoHost
