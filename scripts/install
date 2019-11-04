@@ -56,7 +56,7 @@ ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-
+ynh_script_progression --message="Saving app settings..." --time --weight=1
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app path $path_url
 ynh_app_setting_set $app is_public $is_public
@@ -64,32 +64,26 @@ ynh_app_setting_set $app is_public $is_public
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
-# FIND AND OPEN A PORT
-#=================================================
-
-# Find a free port
-port=$(ynh_find_port 8095)
-# Open this port
-yunohost firewall allow --no-upnp TCP $port 2>&1
-ynh_app_setting_set $app port $port
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
+ynh_script_progression --message="Installing dependencies..." --time --weight=1
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
 #=================================================
-
+ynh_script_progression --message="Creating database..." --time --weight=1
 db_name=$(ynh_sanitize_dbid $app)
 ynh_app_setting_set --app=$app --key=db_name --value=$db_name
+ynh_psql_test_if_first_run
 ynh_psql_setup_db $db_name $db_name
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-
+ynh_script_progression --message="Creating database..." --time --weight=1
 # Create a system user
 ynh_system_user_create $app
 
