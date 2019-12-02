@@ -16,7 +16,6 @@ source /usr/share/yunohost/helpers
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
-port=$(ynh_app_setting_get $app port)
 db_name=$(ynh_app_setting_get $app db_name)
 final_path=$(ynh_app_setting_get $app final_path)
 
@@ -25,9 +24,13 @@ final_path=$(ynh_app_setting_get $app final_path)
 #=================================================
 # STOP AND REMOVE SERVICE
 #=================================================
-
-# Remove the dedicated systemd config
-ynh_remove_systemd_config
+systemctl stop ${app}.target ${app}_sidekiq.service ${app}_web.service
+systemctl disable ${app}.target ${app}_sidekiq.service ${app}_web.service
+ynh_secure_remove --file="/etc/systemd/system/${app}_web.service"
+ynh_secure_remove --file="/etc/systemd/system/${app}_sidekiq.service"
+ynh_secure_remove --file="/etc/tmpfiles.d/${app}.conf"
+ynh_secure_remove --file="/etc/systemd/system/${app}.target"
+systemctl daemon-reload
 
 #=================================================
 # REMOVE SERVICE FROM ADMIN PANEL
@@ -40,25 +43,18 @@ then
 fi
 
 #=================================================
+# REMOVE THE POSTGRESQL DATABASE
+#=================================================
+
+# Remove a database if it exists, along with the associated user
+ynh_psql_remove_db $db_name $db_name
+
+#=================================================
 # REMOVE DEPENDENCIES
 #=================================================
 
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
-
-#=================================================
-# REMOVE THE MYSQL DATABASE
-#=================================================
-
-# Remove a database if it exists, along with the associated user
-ynh_mysql_remove_db $db_name $db_name
-
-#=================================================
-# REMOVE APP MAIN DIR
-#=================================================
-
-# Remove the app directory securely
-ynh_secure_remove "$final_path"
 
 #=================================================
 # REMOVE NGINX CONFIGURATION
@@ -68,43 +64,12 @@ ynh_secure_remove "$final_path"
 ynh_remove_nginx_config
 
 #=================================================
-# REMOVE PHP-FPM CONFIGURATION
-#=================================================
-
-# Remove the dedicated php-fpm config
-ynh_remove_fpm_config
-
-#=================================================
 # REMOVE LOGROTATE CONFIGURATION
 #=================================================
 
 # Remove the app-specific logrotate config
+# TODO setup logrotate ?
 ynh_remove_logrotate
-
-#=================================================
-# CLOSE A PORT
-#=================================================
-
-if yunohost firewall list | grep -q "\- $port$"
-then
-	echo "Close port $port"
-	yunohost firewall disallow TCP $port 2>&1
-fi
-
-#=================================================
-# SPECIFIC REMOVE
-#=================================================
-# REMOVE THE CRON FILE
-#=================================================
-
-# Remove a cron file
-ynh_secure_remove "/etc/cron.d/$app"
-
-# Remove a directory securely
-ynh_secure_remove "/etc/$app/"
-
-# Remove the log files
-ynh_secure_remove "/var/log/$app/"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -113,4 +78,14 @@ ynh_secure_remove "/var/log/$app/"
 #=================================================
 
 # Delete a system user
+# because we use gpg, sometimes rogue processes (gpg an d dirmngr) stays a bit,
+# preventing the deletion of the user. Hence we kill all processes belonging to $app
+pkill -9 -u `id -u $app`
 ynh_system_user_delete $app
+
+#=================================================
+# REMOVE APP MAIN DIR
+#=================================================
+# Remove the app directory securely
+ynh_secure_remove "$final_path"
+

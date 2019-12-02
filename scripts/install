@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# TODO 
+# - check logrotate
+# - which service to register to ynuhosto? diaspora.target only ? All of them ?
+# - backup / restore
+# - changeurl ? Is that possible ? or even a good idea ?
+# - make an admin automatically
+# - integration with ssowat? Or not?
+
 #=================================================
 # GENERIC START
 #=================================================
@@ -57,9 +65,10 @@ ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 ynh_script_progression --message="Saving app settings..." --time --weight=1
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path $path_url
-ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=is_public --value=$is_public
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -68,8 +77,8 @@ ynh_app_setting_set $app is_public $is_public
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." --time --weight=1
-ynh_install_app_dependencies $pkg_dependencies
+ynh_script_progression --message="Installing dependencies..." --time --weight=27
+ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
@@ -79,83 +88,115 @@ db_name=$(ynh_sanitize_dbid $app)
 ynh_app_setting_set --app=$app --key=db_name --value=$db_name
 ynh_psql_test_if_first_run
 ynh_psql_setup_db $db_name $db_name
+db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Creating database..." --time --weight=1
+ynh_script_progression --message="Creating user..." --time --weight=1
 # Create a system user
-ynh_system_user_create $app
+ynh_system_user_create --username=$app --home_dir=$final_path --use_shell
+mkdir -p $final_path
+chown $app:$app $final_path
 
+# SWITCH TO NEW USER UNTIL EOF
+
+#=================================================
+# INSTALL RVM AND RUBY FOR CURRENT USER
+#=================================================
+ynh_script_progression --message="Installing rvm..." --time --weight=10
+sudo -u $app gpg --import ../conf/piotr.kuczynski\@gmail.com.pgp ../conf/mpapis\@gmail.com.pgp
+pushd $final_path
+sudo -u $app curl -sSL https://get.rvm.io | sudo -u $app bash -s stable
+ynh_script_progression --message="Installing ruby 2.4 (this can take a long time)..." --time --weight=230
+sudo -u $app $final_path/.rvm/bin/rvm autolibs read-fail
+sudo -u $app $final_path/.rvm/bin/rvm install 2.4
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+# Download, check integrity, unucompress and patch the source from app.src
+ynh_script_progression --message="Download the sources..." --time --weight=16
+sudo -u $app git clone https://github.com/diaspora/diaspora.git -b v0.7.12.0
+popd
 
-ynh_app_setting_set --app=$app --key=final_path --value=$final_path
-# Download, check integrity, uncompress and patch the source from app.src
-su -l $app -s /bin/bash
-cd ~
-git clone -b v0.7.12.0 https://github.com/diaspora/diaspora.git
-cd diaspora
-config/database.yml
-cp config/diaspora.yml
-curl -L https://s.diaspora.software/1t | bash
-echo [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" | tee ~/.bashrc
-gem install bundler
-RAILS_ENV=production bin/bundle install --jobs $(nproc) --deployment --without test development --with mysql
+#=================================================
+# EXPORT VARIABLES FOR TEMPLATING
+#=================================================
+export app
+export domain
+export path_url
+export db_pass
+export final_path
+
+#=================================================
+# CONFIGURE DIASPORA
+#=================================================
+ynh_script_progression --message="Configure diaspora..." --time --weight=1
+ynh_render_template ../conf/diaspora.yml $final_path/diaspora/config/diaspora.yml
+ynh_render_template ../conf/database.yml $final_path/diaspora/config/database.yml
+
+#=================================================
+# Bundle the ruby app
+#=================================================
+pushd $final_path/diaspora
+ynh_script_progression --message="bundle the app..." --time --weight=1000
+# here we *absolutely* need bash (not dash) because dash does not understand what rvm puts in .profile
+# (wtf rvm for assuming everybody uses bash as default shell??)
+# we also need a login shell to make sure .profile is loaded
+sudo -u $app /bin/bash --login << EOF
+rvm use --default 2.4
+rvm 2.4 do gem install bundler
+script/configure_bundler
+bin/bundle install --full-index --with=postgresql
+EOF
+ynh_script_progression --message="Create db schema..." --time --weight=22
+sudo -u $app /bin/bash --login << EOF
+RAILS_ENV=production bundle exec rake db:migrate
+EOF
+
+#=================================================
+# ASSETS PRECOMPILATION
+#=================================================
+ynh_script_progression --message="Precompile assets..." --time --weight=400
+sudo -u $app /bin/bash --login << EOF
+RAILS_ENV=production bin/rake assets:precompile
+EOF
+popd
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-
+# TODO serve public/ ?
 # Create a dedicated nginx config
+ynh_script_progression --message="configure nginx..." --time --weight=1
 ynh_add_nginx_config
-
-#=================================================
-# SPECIFIC SETUP
-#=================================================
 
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-
 # Create a dedicated systemd config
-ynh_systemd_config
-
-#=================================================
-# SETUP APPLICATION WITH CURL
-#=================================================
-
-# Set right permissions for curl install
-chown -R $app: $final_path
-
-# Set the app as temporarily public for curl call
-ynh_app_setting_set $app unprotected_uris "/"
-# Reload SSOwat config
-yunohost app ssowatconf
-
-# Reload Nginx
-systemctl reload nginx
-
-# Installation with curl
-ynh_local_curl "/INSTALL_PATH" "key1=value1" "key2=value2" "key3=value3"
+# TODO add service in yunohost panel ?
+ynh_script_progression --message="configure systemd unit..." --time --weight=1
+ynh_render_template ../conf/diaspora_sidekiq.service /etc/systemd/system/${app}_sidekiq.service
+ynh_render_template ../conf/diaspora_web.service /etc/systemd/system/${app}_web.service
+ynh_render_template ../conf/diaspora.tmpfiles.d /etc/tmpfiles.d/${app}.conf
+ynh_render_template ../conf/diaspora.target /etc/systemd/system/${app}.target
+systemctl daemon-reload
+systemd-tmpfiles --create
+systemctl enable ${app}.target ${app}_sidekiq.service ${app}_web.service
+systemctl restart ${app}.target
 
 #=================================================
 # STORE THE CHECKSUM OF THE CONFIG FILE
 #=================================================
-
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$final_path/CONFIG_FILE"
+ynh_store_file_checksum --file="$final_path/diaspora/config/diaspora.yml"
+ynh_store_file_checksum --file="$final_path/diaspora/config/database.yml"
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
-# SECURE FILES AND DIRECTORIES
-#=================================================
-
-# Set permissions to app files
-chown -R root: $final_path
 
 #=================================================
 # SETUP LOGROTATE
@@ -167,7 +208,7 @@ ynh_use_logrotate
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
-
+# TODO 
 yunohost service add NAME_INIT.D --log "/var/log/FILE.log"
 
 #=================================================
@@ -188,5 +229,5 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
-
+ynh_script_progression --message="Reload nginx..." --time --weight=1
 systemctl reload nginx

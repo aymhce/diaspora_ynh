@@ -1,40 +1,40 @@
+postgresql: &postgresql
+  adapter: postgresql
+  host: "localhost"
+  port: 5432
+  username: "{{ app }}"
+  password: "{{ db_pass }}"
+  encoding: unicode
+
 mysql: &mysql
   adapter: mysql2
   host: "localhost"
   port: 3306
-  username: "DBUSERTOCHANGE"
-  password: "DBPASSTOCHANGE"
+  username: "root"
+  password: ""
 #  socket: /tmp/mysql.sock
-  charset: utf8mb4
+  encoding: utf8mb4
   collation: utf8mb4_bin
 
-postgres: &postgres
-  adapter: postgresql
-  host: localhost
-  port: 5432
-  username: postgres
-  password:
-  encoding: unicode
 
-# Comment the the mysql line and uncomment the postgres line
-# if you want to use postgres
+# Comment the postgresql line and uncomment the mysql line
+# if you want to use mysql
 common: &common
   # Choose one of the following
-  <<: *mysql
-  #<<: *postgres
+  <<: *postgresql
+  #<<: *mysql
 
   # Should match environment.sidekiq.concurrency
   #pool: 25
-  
+
 ##################################################
 #### CONFIGURE ABOVE #############################
 ##################################################
 
 # Normally you don't need to touch anything here
+# ynh note: we actually do :-) how about having different database name for
+# different instances on the same postgres cluster?
 
-postgres_travis: &postgres_travis
-  adapter: postgresql
-  username: postgres
 combined: &combined
   <<: *common
 development:
@@ -42,10 +42,10 @@ development:
   database: diaspora_development
 production:
   <<: *combined
-  database: diaspora_production
+  database: {{ app }}
 test:
   <<: *combined
-  database: "diaspora_test"
+  database: diaspora_test
 integration1:
   <<: *combined
   database: diaspora_integration1
