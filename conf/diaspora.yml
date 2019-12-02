@@ -36,7 +36,7 @@ configuration: ## Section
     ## However changing http to https is okay and has no consequences.
     ## If you do change the URL, you will have to start again as the URL
     ## will be hardcoded into the database.
-    url: "FULLURLTOCHANGE"
+    url: "https://{{ domain }}{{ path_url }}"
 
     ## Set the bundle of certificate authorities (CA) certificates.
     ## This is specific to your operating system.
@@ -175,15 +175,16 @@ configuration: ## Section
     ## Where the appserver should listen to (default=unix:tmp/diaspora.sock)
     #listen: 'unix:tmp/diaspora.sock'
     #listen: 'unix:/run/diaspora/diaspora.sock'
-    listen: '127.0.0.1:3986'
+    #listen: '127.0.0.1:3000'
+    listen: unix:/run/{{ app }}/diaspora.sock
 
     ## Set the path for the PID file of the unicorn master process (default=tmp/pids/web.pid)
-    #pid: 'tmp/pids/web.pid'
+    pid: '/run/{{ app }}/diaspora.pid'
 
     ## Rails environment (default='development').
     ## The environment in which the server should be started by default.
     ## Change this to 'production' if you wish to run a production environment.
-    #rails_environment: 'development'
+    rails_environment: 'production'
 
     ## Write unicorn stderr and stdout log.
     #stderr_log: '/usr/local/app/diaspora/log/unicorn-stderr.log'
