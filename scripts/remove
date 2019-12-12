@@ -30,6 +30,7 @@ ynh_secure_remove --file="/etc/systemd/system/${app}_web.service"
 ynh_secure_remove --file="/etc/systemd/system/${app}_sidekiq.service"
 ynh_secure_remove --file="/etc/tmpfiles.d/${app}.conf"
 ynh_secure_remove --file="/etc/systemd/system/${app}.target"
+ynh_secure_remove --file="/run/${app}"
 systemctl daemon-reload
 
 #=================================================
