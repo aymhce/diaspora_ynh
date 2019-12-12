@@ -552,14 +552,14 @@ configuration: ## Section
   mail: ## Section
 
     ## First you need to enable it.
-    #enable: true
+    enable: true
 
     ## Sender address used in mail sent by Diaspora.
-    #sender_address: 'no-reply@example.org'
+    sender_address: 'no-reply@{{ domain }}'
 
     ## This selects which mailer should be used. Use 'smtp' for a smtp
     ## connection or 'sendmail' to use the sendmail binary.
-    #method: 'smtp'
+    method: 'sendmail'
 
     ## Ignore if method isn't 'smtp'.
     smtp: ## Section
@@ -596,7 +596,7 @@ configuration: ## Section
     sendmail: ## Section
 
       ## The path to the sendmail binary (default='/usr/sbin/sendmail')
-      #location: '/usr/sbin/sendmail'
+      location: '/usr/sbin/sendmail'
 
       ## Use exim and sendmail (default=false)
       #exim_fix: false
@@ -608,11 +608,10 @@ configuration: ## Section
     ## This doesn't make the user an admin but is used when a generic
     ## admin contact is needed, much like the postmaster role in mail
     ## systems. Set only the username, NOT the full ID.
-    #account: "podmaster"
+    account: "{{ admin }}"
 
     ## E-mail address to contact the administrator.
-    # TODO
-    #podmin_email: 'podmin@example.org'
+    podmin_email: '{{ admin_email }}'
 
   ## Settings related to relays
   # TODO

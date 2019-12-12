@@ -31,6 +31,8 @@ ynh_abort_if_errors
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
 is_public=$YNH_APP_ARG_IS_PUBLIC
+admin=$YNH_APP_ARG_ADMIN
+admin_email=$(ynh_user_get_info --username=$admin --key=mail)
 
 
 # This is a multi-instance app, meaning it can be installed several times independently
@@ -128,6 +130,7 @@ export domain
 export path_url
 export db_pass
 export final_path
+export admin
 
 #=================================================
 # CONFIGURE DIASPORA
