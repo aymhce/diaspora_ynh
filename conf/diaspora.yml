@@ -548,7 +548,6 @@ configuration: ## Section
 
   ## Allow your pod to send emails for notifications, password recovery
   ## and other purposes (disabled by default).
-  # TODO definitely configure that with ynh mail server
   mail: ## Section
 
     ## First you need to enable it.
@@ -614,7 +613,6 @@ configuration: ## Section
     podmin_email: '{{ admin_email }}'
 
   ## Settings related to relays
-  # TODO
   relay: ## Section
 
     ## Relays are applications that exist to push public posts around to
