@@ -623,13 +623,13 @@ configuration: ## Section
 
     outbound: ## Section
       ## Enable this setting to send out public posts from this pod to a relay
-      #send: false
+      send: true
       ## Change default remote relay url used for sending out here
       #url: 'https://relay.iliketoast.net/receive/public'
 
     inbound: ## Section
       ## Enable this to receive public posts from relays
-      #subscribe: false
+      subscribe: true
 
       ## Scope is either 'all' or 'tags' (default).
       ## - 'all', means this pod wants to receive all public posts from a relay
@@ -638,7 +638,7 @@ configuration: ## Section
 
       ## If scope is 'tags', should we include tags that users on this pod follow?
       ## These are added in addition to 'pod_tags', if set.
-      #include_user_tags: false
+      include_user_tags: true
 
       ## If scope is 'tags', a comma separated list of tags here can be set.
       ## For example "linux,diaspora", to receive posts related to these tags
