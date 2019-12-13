@@ -478,7 +478,7 @@ configuration: ## Section
     ## Source code URL
     ## URL to the source code your pod is currently running.
     ## If not set your pod will provide a downloadable archive.
-    #source_url: 'https://example.org/username/diaspora'
+    source_url: 'https://github.com/diaspora/diaspora'
 
     ## Changelog URL
     ## URL to the changelog of the diaspora-version your pod is currently running.
