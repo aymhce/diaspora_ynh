@@ -213,8 +213,10 @@ ynh_use_logrotate
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
-# TODO 
-yunohost service add NAME_INIT.D --log "/var/log/FILE.log"
+yunohost service add $app --log "$final_path/diaspora/log/production.log" \
+  --log "$final_path/diaspora/log/sidekiq.log"\
+  --log "$final_path/diaspora/log/unicorn-stderr.log"\
+  --log "$final_path/diaspora/log/unicorn-stdout.log"
 
 #=================================================
 # SETUP SSOWAT
