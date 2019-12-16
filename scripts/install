@@ -236,12 +236,12 @@ systemctl reload nginx
 ynh_script_progression --message="Create admin..." --time --weight=1
 pushd $final_path/diaspora
 sudo -u diaspora /bin/bash --login << EOF
-  RAILS_ENV=production bundle exec rails console << END
-    user = User.build({username: '$admin', email: '$admin_email', password: '$admin_password', password_confirmation: '$admin_password' })
-    user.seed_aspects
-    user.save
-    Role.add_admin user.person
-  END
+RAILS_ENV=production bundle exec rails console << END
+user = User.build({username: '$admin', email: '$admin_email', password: '$admin_password', password_confirmation: '$admin_password' })
+user.seed_aspects
+user.save
+Role.add_admin user.person
+END
 EOF
 popd
 
