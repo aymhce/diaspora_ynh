@@ -60,6 +60,15 @@
              "fr": "Choisissez l'administrateur de diaspora* (doit être un utilisateur YunoHost)"
            },
            "example": "johndoe"
+         },
+         {
+           "name": "admin_password",
+           "type": "password",
+           "ask": {
+             "en": "Admin password. Must contain at least 10 characters, one lowercase letter, one uppercase letter, one number, and one symbol (e.g. '~!@#$%^&*()').",
+             "fr": "Mot de passe pour l’administrateur. Doit contenir au moins 10 caractères, une majuscule, une minuscule, un chiffre, et une ponctuation (ex. '~!@#$%^&*()')."
+           },
+           "optional": false
          }
        ]
      }

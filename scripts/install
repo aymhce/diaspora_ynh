@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # TODO 
-# - check logrotate
 # - which service to register to ynuhosto? diaspora.target only ? All of them ?
 # - backup / restore
 # - changeurl ? Is that possible ? or even a good idea ?
 # - make an admin automatically
-# - integration with ssowat? Or not?
+# - integration with ssowat? Or not? How exactly?
+# - a setting to enable / disable registration
+# - say something about the registration to https://the-federation.info/ 
 
 #=================================================
 # GENERIC START
@@ -32,6 +33,7 @@ domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
 is_public=$YNH_APP_ARG_IS_PUBLIC
 admin=$YNH_APP_ARG_ADMIN
+admin_password=$YNH_APP_ARG_ADMIN_PASSWORD
 admin_email=$(ynh_user_get_info --username=$admin --key=mail)
 
 
@@ -234,3 +236,19 @@ fi
 #=================================================
 ynh_script_progression --message="Reload nginx..." --time --weight=1
 systemctl reload nginx
+
+#=================================================
+# CREATE AN ADMIN
+#=================================================
+ynh_script_progression --message="Create admin..." --time --weight=1
+pushd $final_path/diaspora
+sudo -u diaspora /bin/bash --login << EOF
+  RAILS_ENV=production bundle exec rails console << END
+    user = User.build({username: '$admin', email: '$admin_email', password: '$admin_password', password_confirmation: '$admin_password' })
+    user.seed_aspects
+    user.save
+    Role.add_admin user.person
+  END
+EOF
+popd
+
