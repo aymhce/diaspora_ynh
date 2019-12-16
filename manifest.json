@@ -44,15 +44,6 @@
            "default": "/"
          },
          {
-           "name": "is_public",
-           "type": "boolean",
-           "ask": {
-             "en": "Is it a public Diaspora site?",
-             "fr": "Est-ce un site public ?"
-           },
-           "default": true
-         },
-         {
            "name": "admin",
            "type": "user",
            "ask": {
