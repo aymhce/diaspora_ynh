@@ -31,7 +31,6 @@ ynh_abort_if_errors
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
-is_public=$YNH_APP_ARG_IS_PUBLIC
 admin=$YNH_APP_ARG_ADMIN
 admin_password=$YNH_APP_ARG_ADMIN_PASSWORD
 admin_email=$(ynh_user_get_info --username=$admin --key=mail)
@@ -71,7 +70,6 @@ ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 ynh_script_progression --message="Saving app settings..." --time --weight=1
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
-ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 
 #=================================================
@@ -213,25 +211,18 @@ ynh_use_logrotate
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
-yunohost service add $app --log "$final_path/diaspora/log/production.log" \
-  --log "$final_path/diaspora/log/sidekiq.log"\
-  --log "$final_path/diaspora/log/unicorn-stderr.log"\
-  --log "$final_path/diaspora/log/unicorn-stdout.log"
+yunohost service add $app.target\
+  --log $final_path/diaspora/log/production.log -t file\
+  --log $final_path/diaspora/log/unicorn-stderr.log -t file\
+  --log $final_path/diaspora/log/unicorn-stdout.log -t file\
+  --log $final_path/diaspora/log/sidekiq.log -t file\
+  --description "Diaspora service (unicorn web and sidekiq)"
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
-
-if [ $is_public -eq 0 ]
-then	# Remove the public access
-	ynh_app_setting_delete $app skipped_uris
-fi
-# Make app public if necessary
-if [ $is_public -eq 1 ]
-then
-	# unprotected_uris allows SSO credentials to be passed anyway.
-	ynh_app_setting_set $app unprotected_uris "/"
-fi
+# unprotected_uris allows SSO credentials to be passed anyway.
+ynh_app_setting_set $app unprotected_uris "/"
 
 #=================================================
 # RELOAD NGINX

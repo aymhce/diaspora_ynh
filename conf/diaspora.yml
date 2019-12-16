@@ -186,7 +186,6 @@ configuration: ## Section
     ## Change this to 'production' if you wish to run a production environment.
     rails_environment: 'production'
 
-    # TODO check
     ## Write unicorn stderr and stdout log.
     stderr_log: 'log/unicorn-stderr.log'
     stdout_log: 'log/unicorn-stdout.log'
@@ -302,8 +301,8 @@ configuration: ## Section
     ## Set this to false to prevent people from signing up to your pod
     ## without an invitation. Note that this needs to be set to true
     ## (or commented out) to enable the first registration (you).
-    # TODO ynh settings?
-    #enable_registrations: true
+    # TODO ynh settings
+    enable_registrations: false
 
     ## Auto-follow on sign-up (default=true)
     ## Users will automatically follow a specified account on creation.
