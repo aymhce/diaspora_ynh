@@ -2,7 +2,6 @@
 Description=Diaspora social network (instance {{ app}})
 Wants=redis.service postgresql.service
 After=redis.service postgresql.service
-StopWhenUnneeded=true
 
 [Install]
 WantedBy=multi-user.target

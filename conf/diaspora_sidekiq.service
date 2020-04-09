@@ -1,7 +1,6 @@
 [Unit]
 Description=Diaspora social network (sidekiq - instance {{ app }})
 PartOf={{ app }}.target
-StopWhenUnneeded=true
 
 [Service]
 User={{ app }}
