@@ -211,6 +211,7 @@ ynh_use_logrotate
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
+yunohost service add postgresql --log /var/log/postgresql/postgresql-9.4-main.log --description "PostgreSQL RDBMS"
 yunohost service add $app.target\
   --log $final_path/diaspora/log/production.log -t file\
   --log $final_path/diaspora/log/unicorn-stderr.log -t file\
