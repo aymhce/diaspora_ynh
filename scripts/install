@@ -119,7 +119,7 @@ sudo -u $app $final_path/.rvm/bin/rvm install 2.4
 #=================================================
 # Download, check integrity, unucompress and patch the source from app.src
 ynh_script_progression --message="Download the sources..." --time --weight=16
-sudo -u $app git clone https://github.com/diaspora/diaspora.git -b v0.7.12.0
+sudo -u $app git clone https://github.com/diaspora/diaspora.git -b v0.7.13.0
 popd
 
 #=================================================
@@ -149,7 +149,7 @@ ynh_script_progression --message="bundle the app..." --time --weight=1000
 # we also need a login shell to make sure .profile is loaded
 sudo -u $app /bin/bash --login << EOF
 rvm use --default 2.4
-rvm 2.4 do gem install bundler
+rvm 2.4 do gem install bundler:1.17.3
 script/configure_bundler
 bin/bundle install --full-index --with=postgresql
 EOF
