@@ -16,7 +16,7 @@
   "requirements": {
     "yunohost": ">= 3.6.0"
   },
-  "multi_instance": "true",
+  "multi_instance": true,
   "services": [
     "nginx",
     "php7-fpm",
