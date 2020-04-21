@@ -1,0 +1,61 @@
+#!/bin/bash
+
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+#Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+source /usr/share/yunohost/helpers
+
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+ynh_script_progression --message="Loading installation settings..." --weight=1
+
+app=$YNH_APP_INSTANCE_NAME
+
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+
+#=================================================
+# STANDARD BACKUP STEPS
+#=================================================
+# clean folder
+rm -rf $final_path/backup
+mkdir -p $final_path/backup
+#=================================================
+# BACKUP DIASPORA DATABASE
+#=================================================
+ynh_script_progression --message="Backup Diaspora DB..." --weight=10
+db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
+dump_file="$final_path/backup/$app.dump"
+pg_dump -d "dbname=$app user=$app password=$db_pass host=localhost" -Fc -f $dump_file
+ynh_backup --src_path="$dump_file"
+#=================================================
+# BACKUP DIASPORA UPLOADS
+#=================================================
+ynh_script_progression --message="Backup uploads..." --weight=10
+if [ -x $final_path/diaspora/public/uploads]; then
+  ynh_backup --src_path="$final_path/diaspora/public/uploads"
+else
+  echo "uploads folder does not exist. Skipping."
+fi
+
+#=================================================
+# BACKUP CONF FILES
+#=================================================
+ynh_script_progression --message="Backup configuration files of Diaspora..." --weight=10
+ynh_backup --src_path="$final_path/diaspora/config/database.yml"
+ynh_backup --src_path="$final_path/diaspora/config/diaspora.yml"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+ynh_script_progression --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)." --last
