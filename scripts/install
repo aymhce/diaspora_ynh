@@ -213,10 +213,10 @@ ynh_use_logrotate
 #=================================================
 yunohost service add postgresql --log /var/log/postgresql/postgresql-9.4-main.log --description "PostgreSQL RDBMS"
 yunohost service add $app.target\
-  --log $final_path/diaspora/log/production.log -t file\
-  --log $final_path/diaspora/log/unicorn-stderr.log -t file\
-  --log $final_path/diaspora/log/unicorn-stdout.log -t file\
-  --log $final_path/diaspora/log/sidekiq.log -t file\
+  --log $final_path/diaspora/log/production.log \
+        $final_path/diaspora/log/unicorn-stderr.log\
+        $final_path/diaspora/log/unicorn-stdout.log\
+        $final_path/diaspora/log/sidekiq.log\
   --description "Diaspora service (unicorn web and sidekiq)"
 
 #=================================================
