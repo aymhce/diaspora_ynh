@@ -22,4 +22,10 @@ final_path=$(ynh_app_setting_get --app $app --key final_path)
 
 ynh_abort_if_errors
 
+upgrade_type=$(ynh_check_app_version_changed)
 # nothing to do yet!!
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+  # do something!
+  echo "to be implemented"
+fi
