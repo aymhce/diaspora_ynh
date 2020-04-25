@@ -1,8 +1,7 @@
 [Unit]
-Description=Diaspora social network
-Wants=redis.service mysqld.service
-After=redis.service mysqld.service
-StopWhenUnneeded=true
+Description=Diaspora social network (instance {{ app}})
+Wants=redis.service postgresql.service
+After=redis.service postgresql.service
 
 [Install]
 WantedBy=multi-user.target

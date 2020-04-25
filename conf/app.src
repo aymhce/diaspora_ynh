@@ -1,6 +1,0 @@
-SOURCE_URL=https://github.com/diaspora/diaspora/archive/v0.6.7.0.zip
-SOURCE_SUM=8bed8a84a336d51a7983636eab9670d85fdd1fc5
-SOURCE_SUM_PRG=sha256
-SOURCE_FORMAT=zip
-SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=
