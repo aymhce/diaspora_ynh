@@ -28,7 +28,7 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 # STANDARD BACKUP STEPS
 #=================================================
 # clean folder
-rm -rf $final_path/backup
+ynh_secure_remove --file="$final_path/backup"
 mkdir -p $final_path/backup
 #=================================================
 # BACKUP DIASPORA DATABASE
