@@ -3,7 +3,6 @@
 # TODO 
 # - which service to register to ynuhosto? diaspora.target only ? All of them ?
 # - backup / restore
-# - changeurl ? Is that possible ? or even a good idea ?
 # - a setting to enable / disable registration
 # - say something about the registration to https://the-federation.info/ 
 
