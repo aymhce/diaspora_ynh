@@ -18,7 +18,7 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." --weight=1
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -51,7 +51,7 @@ fi
 #=================================================
 # BACKUP CONF FILES
 #=================================================
-ynh_script_progression --message="Backup configuration files of Diaspora..." --weight=10
+ynh_script_progression --message="Backup configuration files of Diaspora..."
 ynh_backup --src_path="$final_path/diaspora/config/database.yml"
 ynh_backup --src_path="$final_path/diaspora/config/diaspora.yml"
 
