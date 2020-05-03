@@ -42,7 +42,7 @@ ynh_backup --src_path="$dump_file"
 # BACKUP DIASPORA UPLOADS
 #=================================================
 ynh_script_progression --message="Backup uploads..." --weight=10
-if [ -x $final_path/diaspora/public/uploads]; then
+if [ -x $final_path/diaspora/public/uploads ]; then
   ynh_backup --src_path="$final_path/diaspora/public/uploads"
 else
   echo "uploads folder does not exist. Skipping."
