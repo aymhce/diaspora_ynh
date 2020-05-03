@@ -28,7 +28,6 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
 admin_password=$YNH_APP_ARG_ADMIN_PASSWORD
 admin_email=$(ynh_user_get_info --username=$admin --key=mail)
@@ -49,25 +48,22 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_script_progression --message="Validating installation parameters..." --time --weight=1
-
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path $path_url)
+ynh_script_progression --message="Validating installation parameters..." --weight=1
 
 # Check web path availability
-ynh_webpath_available --domain=$domain --path_url=$path_url
+ynh_webpath_available --domain=$domain --path_url=/
 # check path availability
 final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die "This path already contains a folder"
 # Register (book) web path
-ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
+ynh_webpath_register --app=$app --domain=$domain --path_url=/
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 ynh_script_progression --message="Saving app settings..." --time --weight=1
 ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=path --value=/
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 
 #=================================================
@@ -125,7 +121,6 @@ popd
 #=================================================
 export app
 export domain
-export path_url
 export db_pass
 export final_path
 export admin
