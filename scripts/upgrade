@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-
+ynh_script_progression --message="Loading installation settings..."
 app=$YNH_APP_INSTANCE_NAME
 
 # Retrieve arguments
@@ -22,6 +22,11 @@ final_path=$(ynh_app_setting_get --app $app --key final_path)
 
 ynh_abort_if_errors
 
+
+#=================================================
+# Check upgrade type
+#=================================================
+ynh_script_progression --message="Check upgrade type..."
 upgrade_type=$(ynh_check_app_version_changed)
 # nothing to do yet!!
 if [ "$upgrade_type" == "UPGRADE_APP" ]

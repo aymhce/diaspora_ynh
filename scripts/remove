@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-
+ynh_script_progression --message="Load settings"
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
@@ -24,7 +24,7 @@ final_path=$(ynh_app_setting_get $app final_path)
 #=================================================
 # STOP AND REMOVE SERVICE
 #=================================================
-
+ynh_script_progression --message="Remove services"
 yunohost service remove $app.target
 systemctl stop ${app}.target ${app}_sidekiq.service ${app}_web.service
 systemctl disable ${app}.target ${app}_sidekiq.service ${app}_web.service
@@ -48,20 +48,21 @@ fi
 #=================================================
 # REMOVE THE POSTGRESQL DATABASE
 #=================================================
-
+ynh_script_progression --message="Remove database"
 # Remove a database if it exists, along with the associated user
 ynh_psql_remove_db $db_name $db_name
 
 #=================================================
 # REMOVE DEPENDENCIES
 #=================================================
-
+ynh_script_progression --message="Remove app dependencies" --weight=10
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
 
 #=================================================
 # REMOVE NGINX CONFIGURATION
 #=================================================
+ynh_script_progression --message="Remove nginx config"
 
 # Remove the dedicated nginx config
 ynh_remove_nginx_config
@@ -69,7 +70,7 @@ ynh_remove_nginx_config
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION
 #=================================================
-
+ynh_script_progression --message="Remove logrotate config"
 # Remove the app-specific logrotate config
 # TODO setup logrotate ?
 ynh_remove_logrotate
@@ -79,7 +80,7 @@ ynh_remove_logrotate
 #=================================================
 # REMOVE DEDICATED USER
 #=================================================
-
+ynh_script_progression --message="Remove $app user"
 # Delete a system user
 # because we use gpg, sometimes rogue processes (gpg an d dirmngr) stays a bit,
 # preventing the deletion of the user. Hence we kill all processes belonging to $app
@@ -89,6 +90,7 @@ ynh_system_user_delete $app
 #=================================================
 # REMOVE APP MAIN DIR
 #=================================================
+ynh_script_progression --message="Remove $final_path"
 # Remove the app directory securely
 ynh_secure_remove "$final_path"
 

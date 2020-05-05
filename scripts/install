@@ -4,8 +4,6 @@
 # - which service to register to ynuhosto? diaspora.target only ? All of them ?
 # - backup / restore
 # - changeurl ? Is that possible ? or even a good idea ?
-# - make an admin automatically
-# - integration with ssowat? Or not? How exactly?
 # - a setting to enable / disable registration
 # - say something about the registration to https://the-federation.info/ 
 
@@ -30,7 +28,6 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
 admin_password=$YNH_APP_ARG_ADMIN_PASSWORD
 admin_email=$(ynh_user_get_info --username=$admin --key=mail)
@@ -51,25 +48,22 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_script_progression --message="Validating installation parameters..." --time --weight=1
-
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path $path_url)
+ynh_script_progression --message="Validating installation parameters..." --weight=1
 
 # Check web path availability
-ynh_webpath_available --domain=$domain --path_url=$path_url
+ynh_webpath_available --domain=$domain --path_url=/
 # check path availability
 final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die "This path already contains a folder"
 # Register (book) web path
-ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
+ynh_webpath_register --app=$app --domain=$domain --path_url=/
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Saving app settings..." --time --weight=1
+ynh_script_progression --message="Saving app settings..." --weight=1
 ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=path --value=/
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 
 #=================================================
@@ -79,13 +73,13 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." --time --weight=27
+ynh_script_progression --message="Installing dependencies..." --weight=27
 ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Creating database..." --time --weight=1
+ynh_script_progression --message="Creating database..." --weight=1
 db_name=$(ynh_sanitize_dbid $app)
 ynh_app_setting_set --app=$app --key=db_name --value=$db_name
 ynh_psql_test_if_first_run
@@ -95,7 +89,7 @@ db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Creating user..." --time --weight=1
+ynh_script_progression --message="Creating user..." --weight=1
 # Create a system user
 ynh_system_user_create --username=$app --home_dir=$final_path --use_shell
 mkdir -p $final_path
@@ -106,11 +100,11 @@ chown $app:$app $final_path
 #=================================================
 # INSTALL RVM AND RUBY FOR CURRENT USER
 #=================================================
-ynh_script_progression --message="Installing rvm..." --time --weight=10
+ynh_script_progression --message="Installing rvm..." --weight=10
 sudo -u $app gpg --import ../conf/piotr.kuczynski\@gmail.com.pgp ../conf/mpapis\@gmail.com.pgp
 pushd $final_path
 sudo -u $app curl -sSL https://get.rvm.io | sudo -u $app bash -s stable
-ynh_script_progression --message="Installing ruby 2.4 (this can take a long time)..." --time --weight=230
+ynh_script_progression --message="Installing ruby 2.4 (this can take a long time)..." --weight=230
 sudo -u $app $final_path/.rvm/bin/rvm autolibs read-fail
 sudo -u $app $final_path/.rvm/bin/rvm install 2.4
 
@@ -118,7 +112,7 @@ sudo -u $app $final_path/.rvm/bin/rvm install 2.4
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 # Download, check integrity, unucompress and patch the source from app.src
-ynh_script_progression --message="Download the sources..." --time --weight=16
+ynh_script_progression --message="Download the sources..." --weight=16
 sudo -u $app git clone https://github.com/diaspora/diaspora.git -b v0.7.13.0
 popd
 
@@ -127,7 +121,6 @@ popd
 #=================================================
 export app
 export domain
-export path_url
 export db_pass
 export final_path
 export admin
@@ -135,7 +128,7 @@ export admin
 #=================================================
 # CONFIGURE DIASPORA
 #=================================================
-ynh_script_progression --message="Configure diaspora..." --time --weight=1
+ynh_script_progression --message="Configure diaspora..." --weight=1
 ynh_render_template ../conf/diaspora.yml $final_path/diaspora/config/diaspora.yml
 ynh_render_template ../conf/database.yml $final_path/diaspora/config/database.yml
 
@@ -143,7 +136,7 @@ ynh_render_template ../conf/database.yml $final_path/diaspora/config/database.ym
 # Bundle the ruby app
 #=================================================
 pushd $final_path/diaspora
-ynh_script_progression --message="bundle the app..." --time --weight=1000
+ynh_script_progression --message="bundle the app..." --weight=1000
 # here we *absolutely* need bash (not dash) because dash does not understand what rvm puts in .profile
 # (wtf rvm for assuming everybody uses bash as default shell??)
 # we also need a login shell to make sure .profile is loaded
@@ -153,7 +146,7 @@ rvm 2.4 do gem install bundler:1.17.3
 script/configure_bundler
 bin/bundle install --full-index --with=postgresql
 EOF
-ynh_script_progression --message="Create db schema..." --time --weight=22
+ynh_script_progression --message="Create db schema..." --weight=22
 sudo -u $app /bin/bash --login << EOF
 RAILS_ENV=production bundle exec rake db:migrate
 EOF
@@ -161,7 +154,7 @@ EOF
 #=================================================
 # ASSETS PRECOMPILATION
 #=================================================
-ynh_script_progression --message="Precompile assets..." --time --weight=400
+ynh_script_progression --message="Precompile assets..." --weight=400
 sudo -u $app /bin/bash --login << EOF
 RAILS_ENV=production bin/rake assets:precompile
 EOF
@@ -170,9 +163,8 @@ popd
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-# TODO serve public/ ?
 # Create a dedicated nginx config
-ynh_script_progression --message="configure nginx..." --time --weight=1
+ynh_script_progression --message="configure nginx..." --weight=1
 ynh_add_nginx_config
 
 #=================================================
@@ -180,7 +172,7 @@ ynh_add_nginx_config
 #=================================================
 # Create a dedicated systemd config
 # TODO add service in yunohost panel ?
-ynh_script_progression --message="configure systemd unit..." --time --weight=1
+ynh_script_progression --message="configure systemd unit..." --weight=1
 ynh_render_template ../conf/diaspora_sidekiq.service /etc/systemd/system/${app}_sidekiq.service
 ynh_render_template ../conf/diaspora_web.service /etc/systemd/system/${app}_web.service
 ynh_render_template ../conf/diaspora.tmpfiles.d /etc/tmpfiles.d/${app}.conf
@@ -228,13 +220,13 @@ ynh_app_setting_set $app unprotected_uris "/"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reload nginx..." --time --weight=1
+ynh_script_progression --message="Reload nginx..." --weight=1
 systemctl reload nginx
 
 #=================================================
 # CREATE AN ADMIN
 #=================================================
-ynh_script_progression --message="Create admin..." --time --weight=1
+ynh_script_progression --message="Create admin..." --weight=1
 pushd $final_path/diaspora
 sudo -u diaspora /bin/bash --login << EOF
 RAILS_ENV=production bundle exec rails console << END
