@@ -1,17 +1,15 @@
 diaspora_ynh
 ==========
 
-Ce dépôt est un mirror, merci de soumettre vos Pull Requests sur https://framagit.org/YunoHost-Apps/diaspora_ynh
-This repository is only a mirror please submit Pull Requests and issues on https://framagit.org/YunoHost-Apps/diaspora_ynh
+[![Integration level](https://dash.yunohost.org/integration/diaspora.svg)](https://dash.yunohost.org/appci/app/diaspora) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)    
+[![Install diaspora with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=diaspora)
 
-[![Build Status](https://ci-apps-dev.yunohost.org/jenkins/job/diaspora_ynh%20(Rafi59)/badge/icon)](https://ci-apps-dev.yunohost.org/jenkins/job/diaspora_ynh%20(Rafi59)/)
+## Overview
 
-Diaspora integration for YunoHost
+> *This package allow you to install diaspora* quickly and simply on a YunoHost server.  
+If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
 
-ETAT = NOT WORKING
-Ne pas installer en production 
-
-Do not install this app in production
+**Shipped version:** 0.7.13.0
 
 Notes
 --------------
@@ -26,14 +24,8 @@ Installation effects:
 - Thank you for being patient as deployment time can take up to about 1 hour (raspberry pi).
 - The installation directory can take up to 900MB and app start time can be take 5 minutes
 
-Make yourself (your account) an admin:
-- https://wiki.diasporafoundation.org/FAQ_for_pod_maintainers#What_are_roles_and_how_do_I_use_them.3F_.2F_Make_yourself_an_admin_or_assign_moderators
-
-
-
 
 **TODO**
-* Add backup and restore script
-* Complete refactoring
+* Add restore script
 
 Report a bug: https://github.com/YunoHost-Apps/diaspora_ynh/issues
