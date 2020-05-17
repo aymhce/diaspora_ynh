@@ -25,7 +25,4 @@ Installation effects:
 - The installation directory can take up to 900MB and app start time can be take 5 minutes
 
 
-**TODO**
-* Add restore script
-
 Report a bug: https://github.com/YunoHost-Apps/diaspora_ynh/issues
