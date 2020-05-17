@@ -189,8 +189,8 @@ pushd $final_path/diaspora
 sudo -u $app /bin/bash --login << EOF
 RAILS_ENV=production bundle exec rails console << END
 user = User.build({username: '$admin', email: '$admin_email', password: '$admin_password', password_confirmation: '$admin_password' })
-user.seed_aspects
 user.save
+user.seed_aspects
 Role.add_admin user.person
 END
 EOF
