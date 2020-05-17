@@ -1,15 +1,15 @@
 [Unit]
-Description=Diaspora social network (unicorn - instance {{ app }})
-PartOf={{ app }}.target
+Description=Diaspora social network (unicorn - instance __APP__)
+PartOf=__APP__.target
 
 [Service]
-User={{ app }}
+User=__APP__
 Environment=RAILS_ENV=production
-WorkingDirectory={{ final_path }}/diaspora
-PIDFile=/run/{{ app }}/diaspora.pid
+WorkingDirectory=__FINALPATH__/diaspora
+PIDFile=/run/__APP__/diaspora.pid
 ExecStart=/bin/bash -lc "bin/bundle exec unicorn -c config/unicorn.rb -E production"
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
 
 [Install]
-WantedBy={{ app }}.target
+WantedBy=__APP__.target

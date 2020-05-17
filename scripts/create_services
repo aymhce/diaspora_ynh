@@ -1,0 +1,21 @@
+#!/bin/bash
+# sidekiq
+echo $app $final_path
+install -T --mode=0644 -v ../conf/diaspora_sidekiq.service /etc/systemd/system/${app}_sidekiq.service
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/systemd/system/${app}_sidekiq.service
+ynh_replace_string --match_string=__FINALPATH__ --replace_string=$final_path --target_file=/etc/systemd/system/${app}_sidekiq.service
+# web
+install -T --mode=0644 -v ../conf/diaspora_web.service /etc/systemd/system/${app}_web.service
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/systemd/system/${app}_web.service
+ynh_replace_string --match_string=__FINALPATH__ --replace_string=$final_path --target_file=/etc/systemd/system/${app}_web.service
+# tmp files
+install -T --mode=0644 -v ../conf/diaspora.tmpfiles.d /etc/tmpfiles.d/${app}.conf
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/tmpfiles.d/${app}.conf
+# target unit
+install -T --mode=0644 -v ../conf/diaspora.target /etc/systemd/system/${app}.target
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/systemd/system/${app}.target
+# reload, create, enable and start stuff
+systemctl daemon-reload
+systemd-tmpfiles --create
+systemctl enable ${app}.target ${app}_sidekiq.service ${app}_web.service
+systemctl restart ${app}.target

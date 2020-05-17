@@ -1,5 +1,5 @@
 [Unit]
-Description=Diaspora social network (instance {{ app}})
+Description=Diaspora social network (instance __APP__)
 Wants=redis.service postgresql.service
 After=redis.service postgresql.service
 

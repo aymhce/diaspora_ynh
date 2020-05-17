@@ -1,0 +1,23 @@
+#!/bin/bash
+pushd $final_path/diaspora
+# here we *absolutely* need bash (not dash) because dash does not understand what rvm puts in .profile
+# (wtf rvm for assuming everybody uses bash as default shell??)
+# we also need a login shell to make sure .profile is loaded
+sudo -u $app /bin/bash --login << EOF
+rvm use --default 2.4
+rvm 2.4 do gem install bundler:1.17.3
+script/configure_bundler
+bin/bundle install --full-index --with=postgresql
+EOF
+sudo -u $app /bin/bash --login << EOF
+RAILS_ENV=production bundle exec rake db:migrate
+EOF
+
+#=================================================
+# ASSETS PRECOMPILATION
+#=================================================
+sudo -u $app /bin/bash --login << EOF
+RAILS_ENV=production bin/rake assets:precompile
+EOF
+popd
+
