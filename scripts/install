@@ -2,9 +2,17 @@
 
 # TODO 
 # - which service to register to ynuhosto? diaspora.target only ? All of them ?
-# - backup / restore
 # - a setting to enable / disable registration
 # - say something about the registration to https://the-federation.info/ 
+# - ...
+
+## vars for remove script
+can_remove_db=0
+can_remove_home=0
+can_remove_user=0
+
+# flag to make clean_setup display rvm log if rvm build has failed
+should_display_rvm_log=0
 
 #=================================================
 # GENERIC START
@@ -18,8 +26,13 @@ source /usr/share/yunohost/helpers
 #=================================================
 # MANAGE SCRIPT FAILURE
 #=================================================
-
 # Exit if an error occurs during the execution of the script
+ynh_clean_setup() {
+  # print rvm logs
+  if [ $should_display_rvm_log -eq 1 ]; then
+    find $final_path/.rvm/log/ -name make.log -exec cat {} \;
+  fi
+}
 ynh_abort_if_errors
 
 #=================================================
@@ -31,29 +44,18 @@ admin=$YNH_APP_ARG_ADMIN
 admin_password=$YNH_APP_ARG_ADMIN_PASSWORD
 admin_email=$(ynh_user_get_info --username=$admin --key=mail)
 
-
-# This is a multi-instance app, meaning it can be installed several times independently
-# The id of the app as stated in the manifest is available as $YNH_APP_ID
-# The instance number is available as $YNH_APP_INSTANCE_NUMBER (equals "1", "2", ...)
-# The app instance name is available as $YNH_APP_INSTANCE_NAME
-#    - the first time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample
-#    - the second time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample__2
-#    - ynhexample__{N} for the subsequent installations, with N=3,4, ...
-# The app instance name is probably what you are interested the most, since this is
-# guaranteed to be unique. This is a good unique identifier to define installation path,
-# db names, ...
 app=$YNH_APP_INSTANCE_NAME
+final_path=/var/www/$app
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
 ynh_script_progression --message="Validating installation parameters..." --weight=1
-
 # Check web path availability
 ynh_webpath_available --domain=$domain --path_url=/
 # check path availability
-final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die "This path already contains a folder"
+can_remove_home=1
 # Register (book) web path
 ynh_webpath_register --app=$app --domain=$domain --path_url=/
 
@@ -76,14 +78,13 @@ ynh_script_progression --message="Installing dependencies..." --weight=27
 ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
 
 #=================================================
-# CREATE A POSTGRESQL DATABASE
+# CHECK DB AVAILABILITY
 #=================================================
-ynh_script_progression --message="Creating database..." --weight=1
-db_name=$(ynh_sanitize_dbid $app)
-ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-ynh_psql_test_if_first_run
-ynh_psql_setup_db $db_name $db_name
-db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
+ynh_script_progression --message="Check DB availability"
+# now that we have psql for sure, test db existence
+ynh_script_progression --message="Checking DB availability" --weight=1
+ynh_psql_database_exists --database $app && ynh_die --message="There is already a database: $app"
+can_remove_db=1
 
 #=================================================
 # CREATE DEDICATED USER
@@ -91,29 +92,35 @@ db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 ynh_script_progression --message="Creating user..." --weight=1
 # Create a system user
 ynh_system_user_create --username=$app --home_dir=$final_path --use_shell
+can_remove_user=1
 mkdir -p $final_path
-chown $app:$app $final_path
-
-# SWITCH TO NEW USER UNTIL EOF
+chmod 0750 $final_path -R
+chown $app:www-data $final_path
 
 #=================================================
 # INSTALL RVM AND RUBY FOR CURRENT USER
 #=================================================
-ynh_script_progression --message="Installing rvm..." --weight=10
-sudo -u $app gpg --import ../conf/piotr.kuczynski\@gmail.com.pgp ../conf/mpapis\@gmail.com.pgp
-pushd $final_path
-sudo -u $app curl -sSL https://get.rvm.io | sudo -u $app bash -s stable
-ynh_script_progression --message="Installing ruby 2.4 (this can take a long time)..." --weight=230
-sudo -u $app $final_path/.rvm/bin/rvm autolibs read-fail
-sudo -u $app $final_path/.rvm/bin/rvm install 2.4
+ynh_script_progression --message="Installing rvm and ruby..." --weight=240
+source ./install_rvm_ruby
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 # Download, check integrity, unucompress and patch the source from app.src
+pushd $final_path
 ynh_script_progression --message="Download the sources..." --weight=16
 sudo -u $app git clone https://github.com/diaspora/diaspora.git -b v0.7.13.0
 popd
+
+#=================================================
+# CREATE A POSTGRESQL DATABASE
+#=================================================
+ynh_script_progression --message="Creating database..." --weight=1
+db_name=$(ynh_sanitize_dbid $app)
+ynh_app_setting_set --app=$app --key=db_name --value=$db_name
+ynh_psql_test_if_first_run
+ynh_psql_setup_db --db_user=$db_name --db_name=$db_name
+db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 
 #=================================================
 # EXPORT VARIABLES FOR TEMPLATING
@@ -132,32 +139,17 @@ ynh_render_template ../conf/diaspora.yml $final_path/diaspora/config/diaspora.ym
 ynh_render_template ../conf/database.yml $final_path/diaspora/config/database.yml
 
 #=================================================
-# Bundle the ruby app
+# STORE THE CHECKSUM OF THE CONFIG FILE
 #=================================================
-pushd $final_path/diaspora
-ynh_script_progression --message="bundle the app..." --weight=1000
-# here we *absolutely* need bash (not dash) because dash does not understand what rvm puts in .profile
-# (wtf rvm for assuming everybody uses bash as default shell??)
-# we also need a login shell to make sure .profile is loaded
-sudo -u $app /bin/bash --login << EOF
-rvm use --default 2.4
-rvm 2.4 do gem install bundler:1.17.3
-script/configure_bundler
-bin/bundle install --full-index --with=postgresql
-EOF
-ynh_script_progression --message="Create db schema..." --weight=22
-sudo -u $app /bin/bash --login << EOF
-RAILS_ENV=production bundle exec rake db:migrate
-EOF
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum --file="$final_path/diaspora/config/diaspora.yml"
+ynh_store_file_checksum --file="$final_path/diaspora/config/database.yml"
 
 #=================================================
-# ASSETS PRECOMPILATION
+# Bundle the ruby app
 #=================================================
 ynh_script_progression --message="Precompile assets..." --weight=400
-sudo -u $app /bin/bash --login << EOF
-RAILS_ENV=production bin/rake assets:precompile
-EOF
-popd
+source ./bundle_app
 
 #=================================================
 # NGINX CONFIGURATION
@@ -170,40 +162,13 @@ ynh_add_nginx_config
 # SETUP SYSTEMD
 #=================================================
 # Create a dedicated systemd config
-# TODO add service in yunohost panel ?
 ynh_script_progression --message="configure systemd unit..." --weight=1
-ynh_render_template ../conf/diaspora_sidekiq.service /etc/systemd/system/${app}_sidekiq.service
-ynh_render_template ../conf/diaspora_web.service /etc/systemd/system/${app}_web.service
-ynh_render_template ../conf/diaspora.tmpfiles.d /etc/tmpfiles.d/${app}.conf
-ynh_render_template ../conf/diaspora.target /etc/systemd/system/${app}.target
-systemctl daemon-reload
-systemd-tmpfiles --create
-systemctl enable ${app}.target ${app}_sidekiq.service ${app}_web.service
-systemctl restart ${app}.target
-
-#=================================================
-# STORE THE CHECKSUM OF THE CONFIG FILE
-#=================================================
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$final_path/diaspora/config/diaspora.yml"
-ynh_store_file_checksum --file="$final_path/diaspora/config/database.yml"
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-
-# Use logrotate to manage application logfile(s)
-ynh_use_logrotate
+source ./create_services
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
-yunohost service add postgresql --log /var/log/postgresql/postgresql-9.4-main.log --description "PostgreSQL RDBMS"
-yunohost service add $app.target\
+yunohost service add $app.target \
   --log $final_path/diaspora/log/production.log \
         $final_path/diaspora/log/unicorn-stderr.log\
         $final_path/diaspora/log/unicorn-stdout.log\
@@ -217,12 +182,6 @@ yunohost service add $app.target\
 ynh_app_setting_set $app unprotected_uris "/"
 
 #=================================================
-# RELOAD NGINX
-#=================================================
-ynh_script_progression --message="Reload nginx..." --weight=1
-systemctl reload nginx
-
-#=================================================
 # CREATE AN ADMIN
 #=================================================
 ynh_script_progression --message="Create admin..." --weight=1
@@ -230,8 +189,8 @@ pushd $final_path/diaspora
 sudo -u $app /bin/bash --login << EOF
 RAILS_ENV=production bundle exec rails console << END
 user = User.build({username: '$admin', email: '$admin_email', password: '$admin_password', password_confirmation: '$admin_password' })
-user.seed_aspects
 user.save
+user.seed_aspects
 Role.add_admin user.person
 END
 EOF

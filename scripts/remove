@@ -9,6 +9,10 @@
 source _common.sh
 source /usr/share/yunohost/helpers
 
+can_remove_db=${can_remove_db:=1}
+can_remove_home=${can_remov_home:=1}
+can_remove_user=${can_remove_user:=1}
+
 #=================================================
 # LOAD SETTINGS
 #=================================================
@@ -48,9 +52,11 @@ fi
 #=================================================
 # REMOVE THE POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Remove database"
-# Remove a database if it exists, along with the associated user
-ynh_psql_remove_db $db_name $db_name
+if [ $can_remove_db -eq 1 ]; then
+  ynh_script_progression --message="Remove database"
+  # Remove a database if it exists, along with the associated user
+  ynh_psql_remove_db $db_name $db_name
+fi
 
 #=================================================
 # REMOVE DEPENDENCIES
@@ -68,29 +74,25 @@ ynh_script_progression --message="Remove nginx config"
 ynh_remove_nginx_config
 
 #=================================================
-# REMOVE LOGROTATE CONFIGURATION
-#=================================================
-ynh_script_progression --message="Remove logrotate config"
-# Remove the app-specific logrotate config
-# TODO setup logrotate ?
-ynh_remove_logrotate
-
-#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # REMOVE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Remove $app user"
-# Delete a system user
-# because we use gpg, sometimes rogue processes (gpg an d dirmngr) stays a bit,
-# preventing the deletion of the user. Hence we kill all processes belonging to $app
-pkill -9 -u `id -u $app`
-ynh_system_user_delete $app
+if [ $can_remove_user -eq 1 ]; then
+  ynh_script_progression --message="Remove $app user"
+  # Delete a system user
+  # because we use gpg, sometimes rogue processes (gpg an d dirmngr) stays a bit,
+  # preventing the deletion of the user. Hence we kill all processes belonging to $app
+  pkill -9 -u `id -u $app`
+  ynh_system_user_delete $app
+fi
 
 #=================================================
 # REMOVE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Remove $final_path"
-# Remove the app directory securely
-ynh_secure_remove "$final_path"
+if [ $can_remove_home -eq 1 ]; then
+  ynh_script_progression --message="Remove $final_path"
+  # Remove the app directory securely
+  ynh_secure_remove "$final_path"
+fi
 

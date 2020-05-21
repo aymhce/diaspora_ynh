@@ -1,7 +1,8 @@
 diaspora_ynh
 ==========
 
-[![Integration level](https://dash.yunohost.org/integration/diaspora.svg)](https://dash.yunohost.org/appci/app/diaspora) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)    
+[![Integration level](https://dash.yunohost.org/integration/diaspora.svg)](https://dash.yunohost.org/appci/app/diaspora) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)[![Shipped version](https://img.shields.io/github/v/release/yunohost-apps/diaspora_ynh)](https://github.com/yunohost-apps/diaspora_ynh/releases)
+
 [![Install diaspora with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=diaspora)
 
 ## Overview
@@ -24,8 +25,5 @@ Installation effects:
 - Thank you for being patient as deployment time can take up to about 1 hour (raspberry pi).
 - The installation directory can take up to 900MB and app start time can be take 5 minutes
 
-
-**TODO**
-* Add restore script
 
 Report a bug: https://github.com/YunoHost-Apps/diaspora_ynh/issues
