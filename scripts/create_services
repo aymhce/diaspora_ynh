@@ -19,3 +19,22 @@ systemctl daemon-reload
 systemd-tmpfiles --create
 systemctl enable ${app}.target ${app}_sidekiq.service ${app}_web.service
 systemctl restart ${app}.target
+
+# wait for startup
+timeout=100
+for i in $(seq 1 $timeout)
+do
+    # Read the log until the sentence is found, that means the app finished to start. Or run until the timeout
+    if grep --extended-regexp --quiet "listening on addr" "$final_path/diaspora/log/unicorn-stderr.log"
+    then
+        ynh_print_info --message="Diaspora* is up and running\!"
+        break
+    fi
+    if [ $i -eq 3 ]; then
+        echo -n "Please wait, diaspora* is starting" >&2
+    fi
+    if [ $i -ge 3 ]; then
+        echo -n "." >&2
+    fi
+    sleep 1
+done
