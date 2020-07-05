@@ -7,6 +7,7 @@
 #=================================================
 
 # IMPORT GENERIC HELPERS
+source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -20,17 +21,82 @@ domain=$(ynh_app_setting_get --app $app --key domain)
 admin=$(ynh_app_setting_get --app $app --key admin)
 final_path=$(ynh_app_setting_get --app $app --key final_path)
 
+ynh_clean_setup() {
+  ynh_clean_check_starting
+}
 ynh_abort_if_errors
-
 
 #=================================================
 # Check upgrade type
 #=================================================
 ynh_script_progression --message="Check upgrade type..."
 upgrade_type=$(ynh_check_app_version_changed)
-# nothing to do yet!!
+
+#=================================================
+# Stop services
+#=================================================
+ynh_script_progression --message="Stop services..."
+systemctl stop $app.target 
+
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Installing dependencies..."
+ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
+
+#=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+# migrate from rvm to rbenv
+ynh_script_progression --message="Remove rvm..."
+if [ -e "$final_path/.rvm" ]; then
+  sudo -u $app --login << EOF
+rvm implode --force
+EOF
+fi
+source ./install_ruby
+# remove old gpg keys for rvm
+ynh_script_progression --message="Remove old rvm keys..."
+if gpg --list-keys mpapis@gmail.com >/dev/null 2>&1; then
+  ynh_print_info --message="Found mpapis key: deleting"
+  sudo -u $app gpg --delete-keys mpapis@gmail.com
+  ynh_secure_remove "$final_path/mpapis@gmail.com.pgp"
+fi
+if gpg --list-keys piotr.kuczynski@gmail.com >/dev/null 2>&1; then
+  ynh_print_info --message="Found piotr.kuczynski: deleting"
+  sudo -u $app gpg --delete-keys piotr.kuczynski@gmail.com
+  ynh_secure_remove "$final_path/piotr.kuczynski@gmail.com.pgp"
+fi
+
+if [ "$upgrade_type" == "UPGRADE_APP" ];
+then
+  upgrade_message="Upgrading this app and upstream to $current_tag"
+else
+  upgrade_message="Shallow upgrade of yunohost app"
+fi
+ynh_script_progression --message=$upgrade_message
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-  # do something!
-  echo "to be implemented"
+  # revert local change to .ruby-version
+  pushd $final_path/diaspora
+  git checkout -- .ruby-version
+  git fetch
+  git checkout $current_tag
+  popd
+  source ./bundle_app
 fi
+
+#=================================================
+# restart services
+#=================================================
+ynh_script_progression --message="Recreate and start services..."
+source ./create_services
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+# Create a dedicated nginx config
+ynh_script_progression --message="configure nginx..." --weight=1
+ynh_add_nginx_config
+
+

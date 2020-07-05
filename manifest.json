@@ -8,13 +8,13 @@
     "fr": "Service de réseau social distribué"
   },
   "license": "AGPL-3.0",
-  "version": "0.7.13.0~ynh1",
+  "version": "0.7.14.0~ynh1",
   "maintainer": {
     "name": "rafi59",
     "email": ""
   },
   "requirements": {
-    "yunohost": ">= 3.6.0"
+    "yunohost": ">= 3.7.0"
   },
   "multi_instance": true,
   "services": [

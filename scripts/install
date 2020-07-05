@@ -24,6 +24,9 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 # Exit if an error occurs during the execution of the script
+ynh_clean_setup() {
+  ynh_clean_check_starting
+}
 ynh_abort_if_errors
 
 #=================================================
@@ -100,7 +103,7 @@ source ./install_ruby
 # Download, check integrity, unucompress and patch the source from app.src
 pushd $final_path
 ynh_script_progression --message="Download the sources..." --weight=16
-sudo -u $app git clone https://github.com/diaspora/diaspora.git -b v0.7.13.0
+sudo -u $app git clone https://github.com/diaspora/diaspora.git -b $current_tag
 popd
 
 #=================================================
