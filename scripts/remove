@@ -88,6 +88,13 @@ if [ $can_remove_user -eq 1 ]; then
 fi
 
 #=================================================
+# REMOVE RUBY
+#=================================================
+ynh_script_progression --message="Remove ruby (if this is the last app using it)"
+source $final_path/Experimental_helpers/ynh_install_ruby/ynh_install_ruby
+ynh_remove_ruby
+
+#=================================================
 # REMOVE APP MAIN DIR
 #=================================================
 if [ $can_remove_home -eq 1 ]; then

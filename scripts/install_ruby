@@ -1,0 +1,18 @@
+#!/bin/bash
+# some stuff we don't care about really.
+# clone ynh_experimental helpers
+pushd $final_path
+if [ -x Experimental_helpers ]; then
+  pushd Experimental_helpers
+  git fetch
+  popd
+else
+  git clone https://github.com/YunoHost-Apps/Experimental_helpers.git
+fi
+pushd Experimental_helpers
+git checkout 606b60cf6bb3906d32020392f0a824d1f9971e96
+source ./ynh_install_ruby/ynh_install_ruby
+popd
+popd
+ynh_install_ruby --ruby_version=2.6.6
+

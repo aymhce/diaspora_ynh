@@ -69,7 +69,7 @@ chown $app:www-data $final_path
 # INSTALL RVM AND RUBY FOR CURRENT USER
 #=================================================
 ynh_script_progression --message="Reinstalling rvm and ruby..." --weight=50
-source ./install_rvm_ruby
+source ./install_ruby
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE

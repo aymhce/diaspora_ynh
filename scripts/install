@@ -11,9 +11,6 @@ can_remove_db=0
 can_remove_home=0
 can_remove_user=0
 
-# flag to make clean_setup display rvm log if rvm build has failed
-should_display_rvm_log=0
-
 #=================================================
 # GENERIC START
 #=================================================
@@ -27,12 +24,6 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 # Exit if an error occurs during the execution of the script
-ynh_clean_setup() {
-  # print rvm logs
-  if [ $should_display_rvm_log -eq 1 ]; then
-    find $final_path/.rvm/log/ -name make.log -exec cat {} \;
-  fi
-}
 ynh_abort_if_errors
 
 #=================================================
@@ -101,7 +92,7 @@ chown $app:www-data $final_path
 # INSTALL RVM AND RUBY FOR CURRENT USER
 #=================================================
 ynh_script_progression --message="Installing rvm and ruby..." --weight=240
-source ./install_rvm_ruby
+source ./install_ruby
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
