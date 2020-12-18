@@ -51,6 +51,7 @@ can_remove_home=1
 # Reinstall dependencies
 #=================================================
 ynh_script_progression --message="Reinstalling dependencies..." --weight=27
+
 ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
 
 # now that we have psql for sure, test db existence
@@ -62,6 +63,7 @@ can_remove_db=1
 # Restoring dedicated USER
 #=================================================
 ynh_script_progression --message="Restoring user..." --weight=1
+
 ynh_system_user_create --username=$app --home_dir=$final_path --use_shell
 can_remove_user=1
 mkdir -p $final_path
@@ -72,6 +74,7 @@ chown $app:www-data $final_path
 # INSTALL RVM AND RUBY FOR CURRENT USER
 #=================================================
 ynh_script_progression --message="Reinstalling rvm and ruby..." --weight=50
+
 source ./install_ruby
 
 #=================================================
@@ -112,24 +115,27 @@ ynh_secure_remove --file=/tmp/diaspora.dump
 #=================================================
 # Bundle the ruby app
 #=================================================
-ynh_script_progression --message="Precompile assets..." --weight=200
+ynh_script_progression --message="Precompile assets..." --weight=20
 source ./bundle_app
 
 #=================================================
 # Restore nginx conf files
 #=================================================
 ynh_script_progression --message="Recreate nginx config from source"
+
 ynh_add_nginx_config
 
 #=================================================
 # Restore services
 #=================================================
 ynh_script_progression --message="Restore services..."
+
 source ./create_services
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
+
 yunohost service add $app.target\
   --log $final_path/diaspora/log/production.log \
         $final_path/diaspora/log/unicorn-stderr.log\

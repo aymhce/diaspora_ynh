@@ -18,7 +18,7 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..."
+ynh_print_info --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -30,18 +30,20 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 # clean folder
 ynh_secure_remove --file="$final_path/backup"
 mkdir -p $final_path/backup
+
 #=================================================
 # BACKUP DIASPORA DATABASE
 #=================================================
-ynh_script_progression --message="Backup Diaspora DB..." --weight=10
+
 db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 dump_file="$final_path/backup/$app.dump"
 pg_dump -d "dbname=$app user=$app password=$db_pass host=localhost" -Fc -f $dump_file
 ynh_backup --src_path="$dump_file"
+
 #=================================================
 # BACKUP DIASPORA UPLOADS
 #=================================================
-ynh_script_progression --message="Backup uploads..." --weight=10
+
 if [ -x $final_path/diaspora/public/uploads ]; then
   ynh_backup --src_path="$final_path/diaspora/public/uploads"
 else
@@ -51,11 +53,11 @@ fi
 #=================================================
 # BACKUP CONF FILES
 #=================================================
-ynh_script_progression --message="Backup configuration files of Diaspora..."
+
 ynh_backup --src_path="$final_path/diaspora/config/database.yml"
 ynh_backup --src_path="$final_path/diaspora/config/diaspora.yml"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
-ynh_script_progression --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)." --last
+ynh_print_info --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."
