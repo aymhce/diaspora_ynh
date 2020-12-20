@@ -179,7 +179,6 @@ ynh_app_setting_set $app unprotected_uris "/"
 # CREATE AN ADMIN
 #=================================================
 ynh_script_progression --message="Create admin..." --weight=1
-
 pushd $final_path/diaspora
 sudo -u $app /bin/bash --login << EOF
 RAILS_ENV=production bundle exec rails console << END

@@ -1,11 +1,11 @@
-Diaspora for YunoHost
+# Diaspora* for YunoHost
 
 [![Integration level](https://dash.yunohost.org/integration/diaspora.svg)](https://dash.yunohost.org/appci/app/diaspora) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)[![Shipped version](https://img.shields.io/github/v/release/yunohost-apps/diaspora_ynh)](https://github.com/yunohost-apps/diaspora_ynh/releases)  
 [![Install Diaspora with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=diaspora)
 
 ## Overview
 
-> *This package allow you to install Diaspora quickly and simply on a YunoHost server.  
+> *This package allow you to install Diaspora* quickly and simply on a YunoHost server.  
 If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
 
 **Shipped version:** 0.7.13.0
