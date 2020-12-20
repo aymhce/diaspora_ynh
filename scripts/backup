@@ -34,6 +34,7 @@ mkdir -p $final_path/backup
 #=================================================
 # BACKUP DIASPORA DATABASE
 #=================================================
+ynh_print_info --message="Backup Diaspora DB..."
 
 db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 dump_file="$final_path/backup/$app.dump"
