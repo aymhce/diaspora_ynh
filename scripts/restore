@@ -50,7 +50,7 @@ can_remove_home=1
 #=================================================
 # Reinstall dependencies
 #=================================================
-ynh_script_progression --message="Reinstalling dependencies..." --weight=27
+ynh_script_progression --message="Reinstalling dependencies..." --weight=5
 
 ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
 
@@ -73,7 +73,7 @@ chown $app:www-data $final_path
 #=================================================
 # INSTALL RVM AND RUBY FOR CURRENT USER
 #=================================================
-ynh_script_progression --message="Reinstalling rvm and ruby..." --weight=50
+ynh_script_progression --message="Reinstalling rbenv and ruby..." --weight=10
 
 source ./install_ruby
 
@@ -82,14 +82,14 @@ source ./install_ruby
 #=================================================
 # Download, check integrity, unucompress and patch the source from app.src
 pushd $final_path
-ynh_script_progression --message="Download the sources..." --weight=16
+ynh_script_progression --message="Download the sources..." --weight=5
 sudo -u $app git clone https://github.com/diaspora/diaspora.git -b $current_tag
 popd
 
 #=================================================
 # Restore files
 #=================================================
-ynh_script_progression --message="Restore the files" --weight=16
+ynh_script_progression --message="Restore the files" --weight=5
 ynh_restore_file --origin_path=/var/www/diaspora/diaspora/config/database.yml
 ynh_restore_file --origin_path=/var/www/diaspora/diaspora/config/diaspora.yml
 ynh_restore_file --not_mandatory --origin_path=/var/www/diaspora/diaspora/public/uploads/
@@ -100,7 +100,7 @@ ynh_restore_file --origin_path=/var/www/diaspora/backup/diaspora.dump --dest_pat
 #=================================================
 # Restore database
 #=================================================
-ynh_script_progression --message="Recreating and restoring database..." --weight=16
+ynh_script_progression --message="Recreating and restoring database..." --weight=5
 db_name=$(ynh_sanitize_dbid $app)
 ynh_psql_test_if_first_run
 db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
@@ -115,7 +115,7 @@ ynh_secure_remove --file=/tmp/diaspora.dump
 #=================================================
 # Bundle the ruby app
 #=================================================
-ynh_script_progression --message="Precompile assets..." --weight=20
+ynh_script_progression --message="Precompile assets..." --weight=5
 source ./bundle_app
 
 #=================================================
