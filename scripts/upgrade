@@ -14,6 +14,7 @@ source /usr/share/yunohost/helpers
 # LOAD SETTINGS
 #=================================================
 ynh_script_progression --message="Loading installation settings..."
+
 app=$YNH_APP_INSTANCE_NAME
 
 # Retrieve arguments
@@ -30,18 +31,21 @@ ynh_abort_if_errors
 # Check upgrade type
 #=================================================
 ynh_script_progression --message="Check upgrade type..."
+
 upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
 # Stop services
 #=================================================
 ynh_script_progression --message="Stop services..."
+
 systemctl stop $app.target 
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
 ynh_script_progression --message="Installing dependencies..."
+
 ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
 
 #=================================================
@@ -87,9 +91,20 @@ then
 fi
 
 #=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+yunohost service add $app.target \
+  --log $final_path/diaspora/log/production.log \
+        $final_path/diaspora/log/unicorn-stderr.log\
+        $final_path/diaspora/log/unicorn-stdout.log\
+        $final_path/diaspora/log/sidekiq.log\
+  --description "Diaspora service (unicorn web and sidekiq)"
+
+#=================================================
 # restart services
 #=================================================
 ynh_script_progression --message="Recreate and start services..."
+
 source ./create_services
 
 #=================================================
@@ -97,6 +112,7 @@ source ./create_services
 #=================================================
 # Create a dedicated nginx config
 ynh_script_progression --message="configure nginx..." --weight=1
+
 ynh_add_nginx_config
 
 

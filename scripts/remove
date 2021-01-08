@@ -31,7 +31,7 @@ final_path=$(ynh_app_setting_get $app final_path)
 ynh_script_progression --message="Remove services"
 yunohost service remove $app.target
 systemctl stop ${app}.target ${app}_sidekiq.service ${app}_web.service
-systemctl disable ${app}.target ${app}_sidekiq.service ${app}_web.service
+systemctl disable ${app}.target ${app}_sidekiq.service ${app}_web.service --quiet
 ynh_secure_remove --file="/etc/systemd/system/${app}_web.service"
 ynh_secure_remove --file="/etc/systemd/system/${app}_sidekiq.service"
 ynh_secure_remove --file="/etc/tmpfiles.d/${app}.conf"
