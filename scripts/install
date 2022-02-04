@@ -172,8 +172,8 @@ yunohost service add $app.target \
 #=================================================
 # SETUP SSOWAT
 #=================================================
-# unprotected_uris allows SSO credentials to be passed anyway.
-ynh_app_setting_set $app unprotected_uris "/"
+
+
 
 #=================================================
 # CREATE AN ADMIN
