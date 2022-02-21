@@ -66,7 +66,7 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." --weight=27
+ynh_script_progression --message="Installing dependencies..." --weight=5
 ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
 
 #=================================================
@@ -92,7 +92,7 @@ chown $app:www-data $final_path
 #=================================================
 # INSTALL RVM AND RUBY FOR CURRENT USER
 #=================================================
-ynh_script_progression --message="Installing rvm and ruby..." --weight=240
+ynh_script_progression --message="Installing rvm and ruby... (will take a long time)" --weight=20
 source ./install_ruby
 
 #=================================================
@@ -100,7 +100,7 @@ source ./install_ruby
 #=================================================
 # Download, check integrity, unucompress and patch the source from app.src
 pushd $final_path
-ynh_script_progression --message="Download the sources..." --weight=16
+ynh_script_progression --message="Download the sources..." --weight=10
 sudo -u $app git clone https://github.com/diaspora/diaspora.git -b $current_tag
 popd
 
@@ -140,7 +140,7 @@ ynh_store_file_checksum --file="$final_path/diaspora/config/database.yml"
 #=================================================
 # Bundle the ruby app
 #=================================================
-ynh_script_progression --message="Precompile assets..." --weight=400
+ynh_script_progression --message="Precompile assets (will take a long time)..." --weight=40
 source ./bundle_app
 
 #=================================================
