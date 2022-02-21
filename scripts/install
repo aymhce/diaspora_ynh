@@ -45,8 +45,6 @@ final_path=/var/www/$app
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
 ynh_script_progression --message="Validating installation parameters..." --weight=1
-# Check web path availability
-ynh_webpath_available --domain=$domain --path_url=/
 # check path availability
 test ! -e "$final_path" || ynh_die "This path already contains a folder"
 can_remove_home=1
