@@ -41,8 +41,6 @@ db_user=$db_name
 #=================================================
 ynh_script_progression --message="Validating restoration parameters..."
 
-ynh_webpath_available --domain=$domain --path_url=/ \
-	|| ynh_die --message="Domain not available: ${domain}"
 test ! -d $final_path \
 	|| ynh_die --message="There is already a directory: $final_path "
 can_remove_home=1
@@ -136,17 +134,11 @@ source ./create_services
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app.target\
+yunohost service add $app.target \
   --log $final_path/diaspora/log/production.log \
         $final_path/diaspora/log/unicorn-stderr.log\
         $final_path/diaspora/log/unicorn-stdout.log\
         $final_path/diaspora/log/sidekiq.log\
   --description "Diaspora service (unicorn web and sidekiq)"
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-# unprotected_uris allows SSO credentials to be passed anyway.
-ynh_app_setting_set $app unprotected_uris "/"
 
 popd

@@ -7,17 +7,20 @@ cd diaspora
 script/configure_bundler
 bin/bundle install --full-index --with=postgresql
 EOF
+# for some reason rake logs a lot in stderr (tried --quiet, didn't change anything)
+# redirecting it to stdout to have a saner log on yunohost side
 sudo -u $app --login << EOF
 cd diaspora
-RAILS_ENV=production bundle exec rake db:migrate
+RAILS_ENV=production bundle exec rake db:migrate 2>&1
 EOF
 
 #=================================================
 # ASSETS PRECOMPILATION
 #=================================================
+
 sudo -u $app --login << EOF
 cd diaspora
-RAILS_ENV=production bin/rake assets:precompile
+RAILS_ENV=production bin/rake assets:precompile 2>&1
 EOF
 popd
 

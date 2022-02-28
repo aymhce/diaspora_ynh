@@ -1,0 +1,3 @@
+- There is currently no LDAP integration
+- the installation is very long, especially the frontend building step
+- As upstream doesn't support it, there is no possibility to change the endpoint/url of diaspora\*. Please choose it carefully!
