@@ -1,0 +1,3 @@
+- Il n'y a pas d'intégration LDAP pour le moment.
+- L'installation est très longue, en particulier l'étape de build du frontend.
+- le projet amont ne supporte pas les changements d'url, ainsi l'application yunohost ne supporte pas non plus cette action.
