@@ -81,7 +81,7 @@ source ./install_ruby
 # Download, check integrity, unucompress and patch the source from app.src
 pushd $final_path
 ynh_script_progression --message="Download the sources..." --weight=5
-sudo -u $app git clone https://github.com/diaspora/diaspora.git -b $current_tag
+ynh_exec_warn_less sudo -u $app git clone https://github.com/diaspora/diaspora.git -b $current_tag
 popd
 
 #=================================================
