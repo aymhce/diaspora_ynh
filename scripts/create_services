@@ -22,8 +22,8 @@ systemctl restart ${app}.target
 ynh_systemd_action --service_name=${app}_web.service \
                    --action=restart\
                    --log_path="$final_path/diaspora/log/production.log" \
-                   --line_match="Starting processing"
+                   --line_match="successfully configured the federation library"
 ynh_systemd_action --service_name=${app}_sidekiq.service \
                    --action=restart\
-                   --log_path="$final_path/diaspora/log/unicorn-stderr.log" \
-                   --line_match="listening on addr" 
+                   --log_path="systemd" \
+                   --line_match="Running in ruby"
