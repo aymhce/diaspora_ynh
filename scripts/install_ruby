@@ -10,7 +10,7 @@ else
   ynh_exec_warn_less git clone https://github.com/YunoHost-Apps/Experimental_helpers.git
 fi
 pushd Experimental_helpers
-ynh_exec_warn_less git checkout 606b60cf6bb3906d32020392f0a824d1f9971e96
+ynh_exec_warn_less git checkout d05b4db
 source ./ynh_install_ruby/ynh_install_ruby
 popd
 popd
